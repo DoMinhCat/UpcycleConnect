@@ -1,12 +1,12 @@
 package routes
 
 import (
-	"backend/controller"
+	"backend/controllers"
 	"net/http"
 )
 
 func GetHealthCheckRoute(mux *http.ServeMux) {
-	mux.HandleFunc("/", controller.HealthCheck)
+	mux.HandleFunc("/", controllers.HealthCheck)
 }
 
 func GetUserRoute(mux *http.ServeMux) {

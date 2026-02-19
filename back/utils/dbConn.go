@@ -1,10 +1,9 @@
 package utils
 
-// Connection to DB
+// Establish connection to DB
 
 import (
 	"database/sql"
-	"fmt"
 
 	_ "github.com/lib/pq"
 )
@@ -17,7 +16,7 @@ func GetDb() (*sql.DB, error){
 	var driver = GetDbDriver()
 	conn, err := sql.Open(driver, connString)
 	if err != nil {
-		return nil, fmt.Errorf("connecting to database failed: %v",err)
+		return nil, err
 	}
 
 	return conn, nil

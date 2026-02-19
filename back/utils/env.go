@@ -29,3 +29,11 @@ func GetDbDriver() string{
 	}
 	return driver
 }
+
+func GetPort() string{
+	port := os.Getenv("PORT")
+	if port==""{
+		port="8080"
+	}
+	return port
+}

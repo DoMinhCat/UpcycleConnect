@@ -12,8 +12,8 @@ var Conn *sql.DB
 var ErrDb error
 
 func GetDb() (*sql.DB, error){
-	var connString = GetDbUrl()
-	var driver = GetDbDriver()
+	connString := GetDbUrl()
+	driver := GetDbDriver()
 	conn, err := sql.Open(driver, connString)
 	if err != nil {
 		return nil, err

@@ -7,7 +7,9 @@ import (
 func GetAllRoutes() *http.ServeMux {
 	mux := http.NewServeMux()
 
-	GetHealthCheckRoute(mux)
+	GetHealthCheckRoutes(mux)
+	GetAuthRoutes(mux)
+	GetAccountRoutes(mux)
 	// add more routes later
 
 	return mux

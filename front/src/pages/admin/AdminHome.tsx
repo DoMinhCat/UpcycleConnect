@@ -5,6 +5,8 @@ import {
   Divider,
   Paper,
   Table,
+  Flex,
+  Button,
 } from "@mantine/core";
 import {
   IconArrowUp,
@@ -162,6 +164,10 @@ export default function AdminHome() {
         shadow="md"
         className={classes.customBorder}
       >
+        <Flex justify="flex-end" align="center" gap="md" mb="md">
+          <Button>Sort</Button>
+          <Button>Filter</Button>
+        </Flex>
         {/* TODO: sort and filter button */}
         <AdminTable
           header={demoAdminActivities.header}

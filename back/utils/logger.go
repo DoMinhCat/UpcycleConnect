@@ -1,4 +1,4 @@
-package logger
+package utils
 
 import (
 	"log/slog"
@@ -13,7 +13,7 @@ func InitLogger() {
     // avoid accidentally re-init the logger
 	once.Do(func() {
 		opts := &slog.HandlerOptions{
-			Level: slog.LevelInfo,
+			Level: slog.LevelDebug,
 		}
 
 		// Use JSON

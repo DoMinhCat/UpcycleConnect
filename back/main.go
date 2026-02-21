@@ -3,13 +3,12 @@ package main
 import (
 	"backend/routes"
 	"backend/utils"
-	"backend/utils/logger"
 	"log/slog"
 	"net/http"
 )
 
 func main(){
-	logger.InitLogger()
+	utils.InitLogger()
 
 	utils.LoadEnv()
 	utils.Conn, utils.ErrDb = utils.GetDb()

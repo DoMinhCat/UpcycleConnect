@@ -37,3 +37,11 @@ func GetPort() string{
 	}
 	return port
 }
+
+func GetJWTSecret() []byte{
+	secret := os.Getenv("JWT_SECRET")
+	if secret==""{
+		log.Panic("JWT_SECRET not find in .env")
+	}
+	return []byte(secret)
+}

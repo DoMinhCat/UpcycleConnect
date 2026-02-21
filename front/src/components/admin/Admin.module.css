@@ -38,3 +38,23 @@
 .customBorder {
   border: 1px solid var(--border-color);
 }
+
+.card {
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    background-color 150ms ease;
+}
+
+.card[data-clickable] {
+  cursor: pointer;
+}
+
+.card[data-clickable]:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--mantine-shadow-md);
+}
+
+.card[data-clickable]:active {
+  transform: translateY(-2px);
+}

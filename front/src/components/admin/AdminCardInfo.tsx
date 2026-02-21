@@ -1,5 +1,7 @@
 import { Card, Text, Flex, Title, Box, Group } from "@mantine/core";
+import { useNavigate } from "react-router-dom";
 import { type Icon } from "@tabler/icons-react";
+import classes from "./Admin.module.css";
 
 interface StatsCardDescProps {
   description: string;
@@ -34,6 +36,7 @@ interface AdminCardInfoProps {
   icon: Icon;
   value: string | number;
   description?: React.ReactNode;
+  path?: string;
 }
 
 export function AdminCardInfo({
@@ -41,9 +44,27 @@ export function AdminCardInfo({
   icon: Icon,
   value,
   description,
+  path,
 }: AdminCardInfoProps) {
+  const navigate = useNavigate();
+  const handleClick = () => {
+    if (path) {
+      navigate(path);
+    }
+  };
+
   return (
-    <Card shadow="sm" px="lg" pt="lg" pb="xl" radius="md" withBorder>
+    <Card
+      shadow="sm"
+      px="lg"
+      pt="lg"
+      pb="xl"
+      radius="md"
+      withBorder
+      onClick={handleClick}
+      className={classes.card}
+      data-clickable={path ? true : undefined}
+    >
       <Flex
         gap="xl"
         justify="space-between"

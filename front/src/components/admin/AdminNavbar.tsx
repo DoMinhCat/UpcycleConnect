@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   IconCalendarEventFilled,
   IconClipboardCheck,
@@ -15,26 +14,42 @@ import { Center, Stack, Tooltip, UnstyledButton, Image } from "@mantine/core";
 import classes from "./Admin.module.css";
 import { useMantineColorScheme, useComputedColorScheme } from "@mantine/core";
 import { IconSun, IconMoon } from "@tabler/icons-react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface NavbarLinkProps {
   icon: typeof IconHome2;
   label: string;
   active?: boolean;
+  path?: string;
   onClick?: () => void;
 }
 
 export function NavbarLink({
   icon: Icon,
   label,
-  active,
+  path,
   onClick,
 }: NavbarLinkProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const isActive = path && location.pathname.startsWith(path);
+
+  const handleClick = () => {
+    if (path) {
+      navigate(path);
+    }
+    if (onClick) {
+      onClick();
+    }
+  };
+
   return (
     <Tooltip label={label} position="right" transitionProps={{ duration: 0 }}>
       <UnstyledButton
-        onClick={onClick}
+        onClick={handleClick}
         className={classes.link}
-        data-active={active || undefined}
+        data-active={isActive || undefined}
         aria-label={label}
       >
         <Icon size={20} stroke={1.5} />
@@ -44,15 +59,19 @@ export function NavbarLink({
 }
 
 const navButtonData = [
-  { icon: IconHome2, label: "Overview" },
-  { icon: IconUsers, label: "Users" },
-  { icon: IconClipboardCheck, label: "Validations" },
-  { icon: IconBox, label: "Containers" },
-  { icon: IconCalendarEventFilled, label: "Events" },
-  { icon: IconDiamond, label: "Subscriptions" },
-  { icon: IconArticle, label: "Posts" },
-  { icon: IconBuildingStore, label: "Listings" },
-  { icon: IconPigMoney, label: "Finance" },
+  { icon: IconHome2, label: "Overview", path: "/admin" },
+  { icon: IconUsers, label: "Users", path: "/admin/users" },
+  {
+    icon: IconClipboardCheck,
+    label: "Validations",
+    path: "/admin/validations",
+  },
+  { icon: IconBox, label: "Containers", path: "/admin/containers" },
+  { icon: IconCalendarEventFilled, label: "Events", path: "/admin/events" },
+  { icon: IconDiamond, label: "Subscriptions", path: "/admin/subscriptions" },
+  { icon: IconArticle, label: "Posts", path: "/admin/posts" },
+  { icon: IconBuildingStore, label: "Listings", path: "/admin/listings" },
+  { icon: IconPigMoney, label: "Finance", path: "/admin/finance" },
 ];
 
 function ThemeToggleButton() {
@@ -71,21 +90,14 @@ function ThemeToggleButton() {
 }
 
 export function AdminNavbar() {
-  const [active, setActive] = useState(2);
-
-  const links = navButtonData.map((link, index) => (
-    <NavbarLink
-      {...link}
-      key={link.label}
-      active={index === active}
-      onClick={() => setActive(index)}
-    />
+  const links = navButtonData.map((link) => (
+    <NavbarLink {...link} key={link.label} />
   ));
 
   return (
     <nav className={classes.navbar}>
       <Center>
-        <Image src="../../src/assets/logo.png" />
+        <Image src="/logo.png" />
       </Center>
 
       <div className={classes.navbarMain}>

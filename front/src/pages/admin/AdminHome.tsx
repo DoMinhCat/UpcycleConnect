@@ -1,4 +1,11 @@
-import { Container, Title, SimpleGrid, Divider, Paper } from "@mantine/core";
+import {
+  Container,
+  Title,
+  SimpleGrid,
+  Divider,
+  Paper,
+  Table,
+} from "@mantine/core";
 import {
   IconArrowUp,
   IconPigMoney,
@@ -48,6 +55,7 @@ export default function AdminHome() {
           icon={IconUsers}
           title="Total Users"
           value={99999}
+          path="/admin/users"
           description={
             <StatsCardDesc
               stats={67}
@@ -61,6 +69,7 @@ export default function AdminHome() {
           icon={IconClipboardCheck}
           title="Pending requests"
           value={18}
+          path="/admin/validations"
         />
         <AdminCardInfo
           icon={IconLeaf}
@@ -75,7 +84,12 @@ export default function AdminHome() {
             />
           }
         />
-        <AdminCardInfo icon={IconBox} title="Available containers" value={18} />
+        <AdminCardInfo
+          icon={IconBox}
+          title="Available containers"
+          value={18}
+          path="/admin/containers"
+        />
       </SimpleGrid>
 
       <Divider my="xl" size="xs" color="gray.3" />
@@ -142,7 +156,6 @@ export default function AdminHome() {
         {/* TODO: sort and filter button */}
         <AdminTable
           header={demoAdminActivities.header}
-          body={demoAdminActivities.body}
           footer={
             <PaginationFooter
               start_item={1}
@@ -152,7 +165,15 @@ export default function AdminHome() {
               page_count={15}
             ></PaginationFooter>
           }
-        ></AdminTable>
+        >
+          {demoAdminActivities.body.map((row, rowIndex) => (
+            <Table.Tr key={rowIndex}>
+              {row.map((cell, cellIndex) => (
+                <Table.Td key={cellIndex}>{cell}</Table.Td>
+              ))}
+            </Table.Tr>
+          ))}
+        </AdminTable>
       </Paper>
     </Container>
   );

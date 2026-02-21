@@ -3,11 +3,15 @@ import type React from "react";
 
 export interface AdminTableProps {
   header: string[];
-  body: (string | number)[][];
+  children: React.ReactNode;
   footer?: React.ReactNode;
 }
 
-export default function AdminTable({ header, body, footer }: AdminTableProps) {
+export default function AdminTable({
+  header,
+  children,
+  footer,
+}: AdminTableProps) {
   return (
     <Table striped highlightOnHover>
       <Table.Thead>
@@ -18,17 +22,9 @@ export default function AdminTable({ header, body, footer }: AdminTableProps) {
         </Table.Tr>
       </Table.Thead>
 
-      <Table.Tbody>
-        {body.map((row, rowIndex) => (
-          <Table.Tr key={rowIndex}>
-            {row.map((cell, cellIndex) => (
-              <Table.Td key={cellIndex}>{cell}</Table.Td>
-            ))}
-          </Table.Tr>
-        ))}
-      </Table.Tbody>
+      <Table.Tbody>{children}</Table.Tbody>
 
-      <Table.Caption>{footer}</Table.Caption>
+      {footer && <Table.Caption>{footer}</Table.Caption>}
     </Table>
   );
 }

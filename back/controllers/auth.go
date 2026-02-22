@@ -5,7 +5,6 @@ import (
 	"backend/models"
 	utils "backend/utils/auth"
 	"encoding/json"
-	"fmt"
 	"log/slog"
 	"net/http"
 )
@@ -22,8 +21,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	existing, err := db.GetAccountCredsByEmail(creds.Email) 
 	if err != nil { 
-		http.Error(w, fmt.Sprintf("error requesting user by email: %v", err), 
-		http.StatusInternalServerError) 
+		http.Error(w, "login failed",http.StatusInternalServerError) 
+		slog.Error("GetAccountCredsByEmail() failed", "controller", "Login", "error", err)
 		return 
 	}
 
@@ -32,7 +31,22 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return 
 	}
 
-	token, err := utils.GenerateJWT(creds.Email, existing.Role)
+	// check if is admin
+	if existing.Role=="employee"{
+		isAdmin, err := db.GetEmployeeRoleById(existing.Id)
+		if err != nil { 
+			http.Error(w, "login failed",http.StatusInternalServerError) 
+			slog.Error("GetEmployeeRoleById() failed", "controller", "Login", "error", err)
+		return 
+		}
+		if isAdmin {
+			existing.Role = "admin"
+		} else {
+			existing.Role = "employee"
+		}
+	}
+
+	token, err := utils.GenerateJWT(creds.Email, existing.Role, existing.Id)
 	if err != nil { 
 		http.Error(w, "token generation failed", 
 		http.StatusInternalServerError) 

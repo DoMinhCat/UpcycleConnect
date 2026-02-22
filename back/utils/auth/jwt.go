@@ -9,8 +9,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateJWT(email string, role string) (string, error){
+func GenerateJWT(email string, role string, id int) (string, error){
 	claims := jwt.MapClaims{
+	"id_account": id,
 	"email": email,
 	"role": role,
 	"exp": time.Now().Add(time.Hour).Unix(),
@@ -35,8 +36,7 @@ func VerifyJWT(tokenString string) (models.LoginResponse, error) {
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
 		email, _ := claims["email"].(string)
-		role, _ := claims["role"].(string)
-		response := models.LoginResponse{Email: email, Role: role}
+		response := models.LoginResponse{Email: email}
 		return response, nil
 	}
 	return models.LoginResponse{}, fmt.Errorf("invalid token")

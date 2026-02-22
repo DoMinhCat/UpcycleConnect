@@ -1,4 +1,5 @@
 export const PATHS = {
+  HOME: "/",
   ADMIN: {
     HOME: "/admin",
     USERS: "/admin/users",
@@ -14,7 +15,6 @@ export const PATHS = {
     // paths for user espace
   },
   GUEST: {
-    HOME: "/",
     LOGIN: "/login",
     REGISTER: "/register",
     ABOUT: "/about",

@@ -16,6 +16,8 @@ import { IconX, IconCheck } from "@tabler/icons-react";
 import { PATHS } from "../../routes/paths";
 import { useState } from "react";
 import { LoginRequest } from "../../api/auth";
+import { useNavigate } from "react-router-dom";
+import { getUserRole, isTokenExpired } from "../../api/auth";
 
 // const requirements = [
 //   { re: /[0-9]/, label: "Includes number" },
@@ -68,7 +70,7 @@ export function LoginForm() {
 
   // const strength = getStrength(value);
   // const color = strength === 100 ? "teal" : strength > 50 ? "yellow" : "red";
-
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
@@ -90,11 +92,21 @@ export function LoginForm() {
 
     const isEmailValid = validateEmail(email);
     if (isEmailValid) {
-      console.log("Sending to backend:", { email, password });
       // Call axios
       try {
-        const JWT = await LoginRequest({ email, password });
-        console.log("Login success with token:", JWT);
+        const data = await LoginRequest({ email, password });
+        localStorage.setItem("token", data.token);
+        // redirect
+        if (isTokenExpired()) {
+          localStorage.removeItem("token");
+          navigate(PATHS.GUEST.LOGIN);
+        }
+
+        if (getUserRole() === "admin") {
+          navigate(PATHS.ADMIN.HOME);
+        } else {
+          navigate(PATHS.HOME);
+        }
       } catch (error: any) {
         console.error("Login failed:", error.response?.data || error.message);
       }

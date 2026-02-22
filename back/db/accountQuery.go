@@ -8,11 +8,12 @@ import (
 	"fmt"
 )
 
+// ALL QUERY TO TABLE 'ACCOUNTS'
 func GetAccountCredsByEmail(email string) (*models.AccountCreds, error){
 	var user models.AccountCreds
 
-	row := utils.Conn.QueryRow("SELECT email, password, role FROM accounts WHERE email=$1", email)
-	err := row.Scan(&user.Email, &user.Password, &user.Role)
+	row := utils.Conn.QueryRow("SELECT id, email, password, role FROM accounts WHERE email=$1", email)
+	err := row.Scan(&user.Id, &user.Email, &user.Password, &user.Role)
 	if err!=nil{
 		if err == sql.ErrNoRows {
             return nil, nil // Return nothing found without an error

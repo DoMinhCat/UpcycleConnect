@@ -21,5 +21,6 @@ export const PATHS = {
     PRICING: "/pricing",
     POSTS: "/posts",
     CONTACT: "/contact",
+    FORGOT: "/forgot",
   },
 } as const;

@@ -1,3 +1,82 @@
 /* global styles  */
-.btn {
+.button {
+  &[data-variant="primary"] {
+    background-color: #45a575;
+    color: #f9f7f2;
+    border-radius: 100px;
+    border: transparent;
+
+    &:hover {
+      background-color: #43966c; /* A slightly darker green */
+      transform: translateY(-1px); /* Subtle lift effect */
+      box-shadow: 0 4px 12px rgba(69, 165, 117, 0.3); /* Soft green glow */
+      border: transparent;
+    }
+  }
+
+  &[data-variant="secondary"] {
+    background-color: var(--mantine-color-body);
+    color: var(--mantine-color-text);
+    border-width: 0;
+    border-radius: 100px;
+    border: solid #45a575;
+
+    &:hover {
+      transform: translateY(-1px); /* Subtle lift effect */
+      box-shadow: 0 4px 12px rgba(69, 165, 117, 0.3); /* Soft green glow */
+      border: solid #43966c;
+    }
+  }
+}
+
+.text {
+  &[data-variant="primary"] {
+    color: #45a575 !important;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      color: #43966c; /* A slightly darker green */
+      transform: translateY(-1px);
+      text-decoration: underline;
+      text-shadow: 0 2px 4px rgba(69, 165, 117, 0.2);
+    }
+  }
+
+  /* &[data-variant="secondary"] {
+    color: var(--mantine-color-text);
+    border-width: 0;
+    border-radius: 100px;
+    border: solid #45a575;
+
+    &:hover {
+      transform: translateY(-1px); 
+      box-shadow: 0 4px 12px rgba(69, 165, 117, 0.3); 
+      border: solid #43966c;
+    }
+  } */
+}
+
+.paper {
+  /* Default styles for all papers using this class */
+  transition: transform 0.2s ease;
+
+  &[data-variant="primary"] {
+    background-color: var(--paper-border-color) !important;
+    border: 1px solid var(--border-color);
+  }
+}
+
+.main {
+  width: 100%;
+  /* Use flex-grow so the main area pushes the footer down if the page is empty */
+  flex-grow: 1;
+
+  margin: 0 auto;
+
+  display: flex;
+  flex-direction: column;
+  padding: 40px 16px;
+  box-sizing: border-box;
 }

@@ -12,9 +12,8 @@
   align-items: center;
   justify-content: center;
   color: var(--mantine-color-text);
-  border: 1px solid #6d6d6d;
   &:hover {
-    background-color: #45a575;
+    color: #45a575;
   }
 }
 

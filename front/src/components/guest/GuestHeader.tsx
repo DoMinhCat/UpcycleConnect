@@ -84,12 +84,8 @@ export function GuestHeader() {
         <ThemeToggleButton />
 
         <Group gap="xs" visibleFrom="xs">
-          <Button variant="subtle" color="gray" radius="md">
-            Log in
-          </Button>
-          <Button radius="md" px="lg">
-            Sign up
-          </Button>
+          <Button variant="secondary">Log in</Button>
+          <Button variant="primary">Sign up</Button>
         </Group>
       </Group>
     </Group>

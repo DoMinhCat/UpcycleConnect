@@ -1,31 +1,39 @@
 // src/pages/Home.tsx
-import { getUserRole, isTokenExpired } from "../api/auth";
+import { isTokenExpired } from "../api/auth";
 import AdminHome from "./admin/AdminHome";
 // import ProHome from "./ProHome";
 // import UserHome from "./UserHome";
+import { useAuth } from "../context/AuthContext";
 import { Navigate } from "react-router-dom";
 import { PATHS } from "../routes/paths";
 
 const Home = () => {
-  const role = getUserRole();
+  const { user, logout } = useAuth();
 
   // handle expired token
-  if (!role || isTokenExpired()) {
-    localStorage.removeItem("token");
-    return <Navigate to={PATHS.GUEST.LOGIN} replace />;
-  }
+  if (!user || isTokenExpired()) {
+    logout();
+    // TODO: home page for guest
+    // return <GuestHome />;
 
-  // Render component based on role
-  switch (role) {
-    case "admin":
-      return <AdminHome />;
-    // TODO: add other home page for each role
-    // case "pro":
-    //   return <ProHome />;
-    // case "user":
-    //   return <UserHome />;
-    default:
-      return <Navigate to={PATHS.GUEST.LOGIN} replace />;
+    // temporary
+    return <Navigate to={PATHS.GUEST.LOGIN} />;
+  } else {
+    // Render component based on role
+    switch (user.role) {
+      case "admin":
+        return <AdminHome />;
+      // TODO: add other home page for each role
+      // case "pro":
+      //   return <ProHome />;
+      // case "user":
+      //   return <UserHome />;
+      default:
+        // return <GuestHome />;
+
+        // temporary
+        return <Navigate to={PATHS.GUEST.LOGIN} />;
+    }
   }
 };
 

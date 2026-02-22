@@ -16,6 +16,7 @@ import { useMantineColorScheme, useComputedColorScheme } from "@mantine/core";
 import { IconSun, IconMoon } from "@tabler/icons-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { PATHS } from "../../../src/routes/paths";
+import { useAuth } from "../../context/AuthContext";
 
 interface NavbarLinkProps {
   icon: typeof IconHome2;
@@ -93,6 +94,13 @@ export function AdminNavbar() {
   const links = navButtonData.map((link) => (
     <NavbarLink {...link} key={link.label} />
   ));
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate(PATHS.HOME, { replace: true });
+  };
 
   return (
     <nav className={classes.navbar}>
@@ -110,7 +118,7 @@ export function AdminNavbar() {
         <ThemeToggleButton />
 
         {/* TODO: User avatar */}
-        <NavbarLink icon={IconLogout} label="Logout" />
+        <NavbarLink icon={IconLogout} label="Logout" onClick={handleLogout} />
       </Stack>
     </nav>
   );

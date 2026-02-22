@@ -17,7 +17,7 @@ import { PATHS } from "../../routes/paths";
 import { useState } from "react";
 import { LoginRequest } from "../../api/auth";
 import { useNavigate } from "react-router-dom";
-import { getUserRole, isTokenExpired } from "../../api/auth";
+import { useAuth } from "../../context/AuthContext";
 
 // const requirements = [
 //   { re: /[0-9]/, label: "Includes number" },
@@ -71,6 +71,7 @@ export function LoginForm() {
   // const strength = getStrength(value);
   // const color = strength === 100 ? "teal" : strength > 50 ? "yellow" : "red";
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
@@ -90,26 +91,22 @@ export function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); // Prevents page reload
 
-    const isEmailValid = validateEmail(email);
-    if (isEmailValid) {
-      // Call axios
-      try {
-        const data = await LoginRequest({ email, password });
-        localStorage.setItem("token", data.token);
-        // redirect
-        if (isTokenExpired()) {
-          localStorage.removeItem("token");
-          navigate(PATHS.GUEST.LOGIN);
-        }
+    if (!validateEmail(email)) return;
 
-        if (getUserRole() === "admin") {
-          navigate(PATHS.ADMIN.HOME);
-        } else {
-          navigate(PATHS.HOME);
-        }
-      } catch (error: any) {
-        console.error("Login failed:", error.response?.data || error.message);
+    try {
+      // Call axios
+      const data = await LoginRequest({ email, password });
+      const user = login(data.token);
+
+      // redirect
+      if (user.role === "admin") {
+        navigate(PATHS.ADMIN.HOME);
+      } else {
+        navigate(PATHS.HOME);
       }
+    } catch (error: any) {
+      // TODO: toast for error
+      console.error("Login failed:", error.response?.data || error.message);
     }
   };
 

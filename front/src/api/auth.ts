@@ -24,14 +24,6 @@ export const getToken = () => {
   return localStorage.getItem("token");
 };
 
-export const getUserRole = () => {
-  const token = getToken();
-  if (!token) return null;
-
-  const decoded = jwtDecode<DecodedToken>(token);
-  return decoded.role;
-};
-
 export const isTokenExpired = () => {
   const token = getToken();
   if (!token) return true;

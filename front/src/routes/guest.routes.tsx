@@ -1,6 +1,6 @@
 import { type RouteObject } from "react-router-dom";
 import GuestLayout from "../layouts/GuestLayout.tsx";
-import Login from "../pages/guest/Login.tsx";
+import Login from "../pages/guest/LoginPage.tsx";
 import { PATHS } from "./paths.ts";
 
 export const guestRoutes: RouteObject = {

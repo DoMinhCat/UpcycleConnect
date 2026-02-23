@@ -21,7 +21,7 @@ func GenerateJWT(email string, role string, id int) (string, error){
 	return token.SignedString(utils.GetJWTSecret())
 }
 
-func VerifyJWT(tokenString string) (models.LoginResponse, error) {
+func ParseJWT(tokenString string) (models.AuthClaims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any,error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
@@ -31,13 +31,20 @@ func VerifyJWT(tokenString string) (models.LoginResponse, error) {
 	})
 
 	if err != nil {
-		return models.LoginResponse{}, err
+		return models.AuthClaims{}, err
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
+		idFloat,_ := claims["id_account"].(float64)
+		idAccount := int(idFloat)
 		email, _ := claims["email"].(string)
-		response := models.LoginResponse{Email: email}
-		return response, nil
+		role, _ := claims["role"].(string)
+
+		return models.AuthClaims{
+			Id:    idAccount,
+			Email: email,
+			Role:  role,
+		}, nil
 	}
-	return models.LoginResponse{}, fmt.Errorf("invalid token")
+	return models.AuthClaims{}, fmt.Errorf("invalid token")
 }

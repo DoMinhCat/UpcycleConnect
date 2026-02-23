@@ -1,9 +1,9 @@
 package models
 
-type LoginResponse struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Role     string `json:"role"`
+type AuthClaims struct {
+	Id    int    `json:"id"`
+	Email string `json:"email"`
+	Role  string `json:"role"`
 }
 
 type LoginRequest struct {

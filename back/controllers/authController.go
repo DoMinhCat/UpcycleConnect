@@ -16,7 +16,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil { 
 		response.RespondWithError(w, http.StatusBadRequest, "An error occurred.")
-		slog.Error("invalid JSON request body", "error", err)
+		slog.Error("invalid JSON request body", "controller", "Login", "error", err)
 		return 
 	} 
 

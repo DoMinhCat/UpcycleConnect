@@ -107,7 +107,7 @@ export function LoginForm() {
         navigate(PATHS.HOME);
       }
     } catch (error: any) {
-      showErrorNotification(error, "Login Failed");
+      showErrorNotification("Login Failed", error);
     } finally {
       setIsLoading(false);
     }

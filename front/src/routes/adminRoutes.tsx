@@ -5,6 +5,7 @@ import { PATHS } from "./paths.ts";
 import { useAuth } from "../context/AuthContext.tsx";
 import { isTokenExpired } from "../api/auth.ts";
 
+// implement the same Guard component for user and pro
 const AdminGuard = ({ children }: { children: React.ReactNode }) => {
   const { user, logout } = useAuth();
   const unauthorized = !user || user.role !== "admin" || isTokenExpired();
@@ -30,7 +31,11 @@ export const adminRoutes: RouteObject = {
       index: true,
       element: <AdminHome />, // page
     },
-    // Future admin routes go here
-    // { path: "settings", element: <AdminSettings /> }
+    /* example of future path
+    {
+      path: "containers",     // Affiche <AdminContainers /> sur "/admin/containers"
+      element: <AdminContainers />,
+    },
+    */
   ],
 };

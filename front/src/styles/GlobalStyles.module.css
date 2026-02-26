@@ -78,7 +78,7 @@
     border: 1px solid transparent;
 
     &:hover {
-      border-color: #45a575; /* Your Gold Accent */
+      border-color: #45a575; /* Gold Accent */
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(69, 165, 117, 0.2);
     }

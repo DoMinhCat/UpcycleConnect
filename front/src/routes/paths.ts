@@ -1,5 +1,8 @@
 export const PATHS = {
+  // common endpoints here for all roles
   HOME: "/",
+
+  // admin endpoints
   ADMIN: {
     HOME: "/admin",
     USERS: "/admin/users",
@@ -12,7 +15,10 @@ export const PATHS = {
     SUBSCRIPTIONS: "/admin/subscriptions",
   },
   USER: {
-    // paths for user espace
+    // paths for user espace here
+  },
+  PRO: {
+    // paths for pro/artisans espace here
   },
   GUEST: {
     LOGIN: "/login",

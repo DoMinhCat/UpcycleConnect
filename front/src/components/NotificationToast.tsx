@@ -1,7 +1,8 @@
 import { notifications } from "@mantine/notifications";
 
 const autoCloseDuration = 5000;
-export const showErrorNotification = (error: any, title = "Error") => {
+export const showErrorNotification = (title = "Error", error: any) => {
+  // default title is "Error" if not provided any title
   let message = "An unexpected error occurred.";
 
   if (error.response) {
@@ -41,6 +42,7 @@ export const showErrorNotification = (error: any, title = "Error") => {
 };
 
 export const showInfoNotification = (title = "Info", message: string) => {
+  // default title is "Info" if not provided any title
   notifications.show({
     title: title,
     message: message,

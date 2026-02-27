@@ -2,14 +2,54 @@ import { Container, Grid, Title, Table, Button, TextInput, Select } from "@manti
 import AdminTable from "../../components/admin/AdminTable";
 import { IconSearch, IconChevronDown, IconPlus } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getAllAccounts, type Account } from "../../api/admin/userModule";
+import { showNotification } from "@mantine/notifications";
+import dayjs from "dayjs";
 
 export default function AdminUsersModule() {
+    const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
     const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [searchValue, setSearchValue] = useState<string | undefined>(undefined);
     const [sortValue, setSortValue] = useState<string | null>(null);
     const [roleValue, setRoleValue] = useState<string | null>(null);
     const [statusValue, setStatusValue] = useState<string | null>(null);
+
+    const [accounts, setAccounts] = useState<Account[]>([]);
+    useEffect(() => {
+        const fetchAccounts = async () => {
+            setIsLoading(true);
+            try {
+                const response = await getAllAccounts();
+                setAccounts(response);
+            } catch (error) {
+                showNotification({
+                    title: "Error",
+                    message: "Failed to fetch accounts",
+                    color: "red",
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchAccounts();
+    }, []);
+    const listUsers = accounts.map((account) => (
+        <Table.Tr key={account.id}>
+            <Table.Td>{dayjs(account.created_at).format("DD/MM/YYYY - HH:mm")}</Table.Td>
+            <Table.Td>{account.id}</Table.Td>
+            <Table.Td>{account.username}</Table.Td>
+            <Table.Td>{account.email}</Table.Td>
+            <Table.Td>{capitalize(account.role)}</Table.Td>
+            <Table.Td>{account.status}</Table.Td>
+            <Table.Td>
+                <Button variant="edit" me="sm" size="xs">Edit</Button>
+                <Button variant="delete" size="xs">Delete</Button>
+            </Table.Td>
+        </Table.Tr>
+    ));
 
     return (
         <Container px="md" size="xl">
@@ -40,42 +80,7 @@ export default function AdminUsersModule() {
             </Grid>
 
             <AdminTable header={["Registered on", "ID", "Username", "Email", "Role", "Status", "Actions"]} >
-                <Table.Tr>
-                    <Table.Td>2022-01-01</Table.Td>
-                    <Table.Td>1</Table.Td>
-                    <Table.Td>John Doe</Table.Td>
-                    <Table.Td>[EMAIL_ADDRESS]</Table.Td>
-                    <Table.Td>User</Table.Td>
-                    <Table.Td>Active</Table.Td>
-                    <Table.Td>
-                        <Button variant="edit" me="sm" size="xs">Edit</Button>
-                        <Button variant="delete" size="xs">Delete</Button>
-                    </Table.Td>
-                </Table.Tr>
-                <Table.Tr>
-                    <Table.Td>2022-01-01</Table.Td>
-                    <Table.Td>1</Table.Td>
-                    <Table.Td>John Doe</Table.Td>
-                    <Table.Td>[EMAIL_ADDRESS]</Table.Td>
-                    <Table.Td>User</Table.Td>
-                    <Table.Td>Active</Table.Td>
-                    <Table.Td>
-                        <Button variant="edit" me="sm" size="xs">Edit</Button>
-                        <Button variant="delete" size="xs">Delete</Button>
-                    </Table.Td>
-                </Table.Tr>
-                <Table.Tr>
-                    <Table.Td>2022-01-01</Table.Td>
-                    <Table.Td>1</Table.Td>
-                    <Table.Td>John Doe</Table.Td>
-                    <Table.Td>[EMAIL_ADDRESS]</Table.Td>
-                    <Table.Td>User</Table.Td>
-                    <Table.Td>Active</Table.Td>
-                    <Table.Td>
-                        <Button variant="edit" me="sm" size="xs">Edit</Button>
-                        <Button variant="delete" size="xs">Delete</Button>
-                    </Table.Td>
-                </Table.Tr>
+                {listUsers}
             </AdminTable>
         </Container>
     );

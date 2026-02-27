@@ -154,7 +154,6 @@ export default function RegisterForm() {
         return true;
     };
 
-    // TODO: Add register function
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault(); // Prevents page reload
 

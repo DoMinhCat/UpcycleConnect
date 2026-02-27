@@ -38,7 +38,7 @@ func CheckEmailExists(email string) (bool, error) {
 	return exists, err
 }
 
-func CreateAccountUser(newAccount models.CreateAccountRequest) error {
+func CreateAccount(newAccount models.CreateAccountRequest) error {
 	//hash password
 	hashedPassword := authUtils.HashPassword(newAccount.Password)
 
@@ -72,7 +72,7 @@ func CreateAccountUser(newAccount models.CreateAccountRequest) error {
 			if err != nil {
 				return fmt.Errorf("error rolling back after failed insertion into 'employees': %w", err)
 			}
-			return fmt.Errorf("error inserting into employees table: %w", err)
+			return fmt.Errorf("CreateAccount() failed: %w", err)
 		}
 
 	default:
@@ -94,7 +94,7 @@ func CreateUser(newAccount models.CreateAccountRequest, accountID int) error {
 		if err != nil {
 			return fmt.Errorf("error rolling back after failed insertion into 'users': %w", err)
 		}
-		return fmt.Errorf("error inserting into users table: %w", err)
+		return fmt.Errorf("CreateUser() failed: %w", err)
 	}
 	return nil
 }
@@ -111,7 +111,7 @@ func CreatePro(newAccount models.CreateAccountRequest, accountID int) error {
 		if err != nil {
 			return fmt.Errorf("error rolling back after failed insertion into 'pros': %w", err)
 		}
-		return fmt.Errorf("error inserting into pros table: %w", err)
+		return fmt.Errorf("CreatePro() failed: %w", err)
 	}
 	return nil
 }
@@ -121,7 +121,27 @@ func DeleteAccount(id int) error {
 
 	_, err := utils.Conn.Exec("DELETE FROM accounts WHERE id=$1;", id)
 	if err != nil {
-		return fmt.Errorf("error deleting account from database: %v", err.Error())
+		return fmt.Errorf("DeleteAccount() failed: %v", err.Error())
 	}
 	return nil
+}
+
+func GetAllAccounts() ([]models.Account, error) {
+	var accounts []models.Account
+
+	rows, err := utils.Conn.Query("SELECT id, email, username, role, is_banned, created_at FROM accounts")
+	if err != nil {
+		return nil, fmt.Errorf("GetAllAccounts() failed: %v", err.Error())
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var account models.Account
+		if err := rows.Scan(&account.Id, &account.Email, &account.Username, &account.Role, &account.IsBanned, &account.CreatedAt); err != nil {
+			return nil, fmt.Errorf("GetAllAccounts() failed: %v", err.Error())
+		}
+		accounts = append(accounts, account)
+	}
+
+	return accounts, nil
 }

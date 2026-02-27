@@ -17,7 +17,7 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 	var err = json.NewDecoder(r.Body).Decode(&newAccount)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusBadRequest, "An error occurred while creating an account for you.")
-		slog.Debug("invalid JSON request body", "error", err)
+		slog.Error("invalid JSON request body", "error", err)
 		return
 	}
 
@@ -91,12 +91,23 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.CreateAccountUser(newAccount)
+	err = db.CreateAccount(newAccount)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, "An error occured while creating an account for you.")
-		slog.Debug("CreateAccountUser() failed", "error", err)
+		slog.Error("CreateAccount() failed", "error", err)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	utils.RespondWithJSON(w, http.StatusCreated, nil)
+}
+
+func GetAllAccounts(w http.ResponseWriter, r *http.Request) {
+	accounts, err := db.GetAllAccounts()
+	if err != nil {
+		utils.RespondWithError(w, http.StatusInternalServerError, "An error occured while fetching accounts.")
+		slog.Error("GetAllAccounts() failed", "error", err)
+		return
+	}
+
+	utils.RespondWithJSON(w, http.StatusOK, accounts)
 }

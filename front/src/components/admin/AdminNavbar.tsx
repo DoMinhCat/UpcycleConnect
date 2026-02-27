@@ -30,7 +30,12 @@ function NavbarLink({ icon: Icon, label, path, onClick }: NavbarLinkProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isActive = path && location.pathname.startsWith(path);
+  let isActive = false;
+  if (path && path !== PATHS.ADMIN.HOME) {
+    isActive = location.pathname.startsWith(path);
+  } else {
+    isActive = location.pathname === PATHS.ADMIN.HOME;
+  }
 
   const handleClick = () => {
     if (path) {

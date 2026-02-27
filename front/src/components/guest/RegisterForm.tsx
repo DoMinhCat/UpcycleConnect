@@ -195,6 +195,7 @@ export default function RegisterForm() {
                 <form onSubmit={handleSubmit}>
                     <Fieldset legend="Credentials" variant="unstyled">
                         <TextInput
+                            variant="body-color"
                             label="Email"
                             placeholder="example@gmail.com"
                             radius="md"
@@ -219,6 +220,7 @@ export default function RegisterForm() {
                         >
                             <Popover.Target>
                                 <PasswordInput
+                                    variant="body-color"
                                     withAsterisk
                                     label="Password"
                                     placeholder="Your super secret"
@@ -251,6 +253,7 @@ export default function RegisterForm() {
 
                         <PasswordInput
                             label="Confirm Password"
+                            variant="body-color"
                             placeholder="Confirm your password"
                             value={ConfirmPassword}
                             mt="md"
@@ -269,6 +272,7 @@ export default function RegisterForm() {
                     <Fieldset legend="Personal information" variant="unstyled">
                         <TextInput
                             label="Username"
+                            variant="body-color"
                             placeholder="John Doe"
                             radius="md"
                             mb="md"
@@ -285,6 +289,7 @@ export default function RegisterForm() {
                         />
                         <TextInput
                             label="Phone number"
+                            variant="body-color"
                             placeholder="06 12 34 56 78"
                             radius="md"
                             mb="md"

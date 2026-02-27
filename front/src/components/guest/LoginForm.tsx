@@ -88,6 +88,7 @@ export function LoginForm() {
       >
         <form onSubmit={handleSubmit}>
           <TextInput
+            variant="body-color"
             label="Email"
             placeholder="example@gmail.com"
             radius="md"
@@ -99,6 +100,7 @@ export function LoginForm() {
             required
           />
           <PasswordInput
+            variant="body-color"
             label="Password"
             placeholder="Your secret"
             onChange={(event) => { const password = event.currentTarget.value; setPassword(password); validatePassword(password); }}
@@ -114,9 +116,9 @@ export function LoginForm() {
             </Anchor>
           </Group>
           <Button
+            variant="primary"
             fullWidth
             mt="xl"
-            variant="primary"
             type="submit"
             disabled={isLoading}
             loading={isLoading}

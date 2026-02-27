@@ -76,6 +76,7 @@ function HeaderLink({ label, path, onClick }: { label: string; path: string; onC
 
 export function GuestHeader() {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
+  const navigate = useNavigate();
 
   return (
     <Group justify="space-between" h="100%" px="xl" className={classes.header}>
@@ -135,8 +136,8 @@ export function GuestHeader() {
         </Menu>
 
         <Group gap="xs" visibleFrom="xs">
-          <Button variant="secondary">Log in</Button>
-          <Button variant="primary">Sign up</Button>
+          <Button variant="secondary" name="login" onClick={() => navigate(PATHS.GUEST.LOGIN)}>Log in</Button>
+          <Button variant="primary" name="register" onClick={() => navigate(PATHS.GUEST.REGISTER)}>Sign up</Button>
         </Group>
 
         <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="sm" size="sm" />

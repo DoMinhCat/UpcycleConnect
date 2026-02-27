@@ -8,7 +8,7 @@ import {
   ActionIcon,
   TextInput,
   PasswordInput,
-  Checkbox,
+  Select,
 } from "@mantine/core";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./routes/routes";
@@ -21,6 +21,14 @@ const UpAgainTheme = createTheme({
   cursorType: 'pointer',
 
   components: {
+    Select: Select.extend({
+      defaultProps: {
+        classNames: {
+          input: classes.input,
+          label: classes.label,
+        },
+      },
+    }),
     Button: Button.extend({
       defaultProps: {
         classNames: {

@@ -4,6 +4,7 @@ import AdminHome from "../pages/admin/AdminHome.tsx";
 import { PATHS } from "./paths.ts";
 import { useAuth } from "../context/AuthContext.tsx";
 import { isTokenExpired } from "../api/auth.ts";
+import AdminUsersModule from "../pages/admin/AdminUsersModule.tsx";
 
 // implement the same Guard component for user and pro
 const AdminGuard = ({ children }: { children: React.ReactNode }) => {
@@ -31,11 +32,9 @@ export const adminRoutes: RouteObject = {
       index: true,
       element: <AdminHome />, // page
     },
-    /* example of future path
     {
-      path: "containers",     // Affiche <AdminContainers /> sur "/admin/containers"
-      element: <AdminContainers />,
+      path: "users",     // Affiche <AdminUsersModule /> sur "/admin/users"
+      element: <AdminUsersModule />,
     },
-    */
   ],
 };

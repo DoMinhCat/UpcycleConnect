@@ -13,8 +13,8 @@ export default function AdminTable({
   footer,
 }: AdminTableProps) {
   return (
-    <Table.ScrollContainer minWidth={600}>
-      <Table striped highlightOnHover>
+    <Table.ScrollContainer minWidth={600} mx="0">
+      <Table striped highlightOnHover style={{ width: '100%', maxWidth: 'none' }}>
         <Table.Thead>
           <Table.Tr>
             {header.map((title, index) => (

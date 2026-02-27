@@ -7,9 +7,12 @@
     border: transparent;
 
     &:hover {
-      background-color: #43966c; /* A slightly darker green */
-      transform: translateY(-1px); /* Subtle lift effect */
-      box-shadow: 0 4px 12px rgba(69, 165, 117, 0.3); /* Soft green glow */
+      background-color: #43966c;
+      /* A slightly darker green */
+      transform: translateY(-1px);
+      /* Subtle lift effect */
+      box-shadow: 0 4px 12px rgba(69, 165, 117, 0.3);
+      /* Soft green glow */
       border: transparent;
     }
   }
@@ -22,9 +25,35 @@
     border: solid #45a575;
 
     &:hover {
-      transform: translateY(-1px); /* Subtle lift effect */
-      box-shadow: 0 4px 12px rgba(69, 165, 117, 0.3); /* Soft green glow */
+      transform: translateY(-1px);
+      /* Subtle lift effect */
+      box-shadow: 0 4px 12px rgba(69, 165, 117, 0.3);
+      /* Soft green glow */
       border: solid #43966c;
+    }
+  }
+
+  &[data-variant="edit"] {
+    background-color: #e3b23c;
+    color: var(--mantine-color-text);
+    border-width: 0;
+    border-radius: 100px;
+    border: solid #d6a126;
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+  }
+
+  &[data-variant="delete"] {
+    background-color: var(--mantine-color-red-6);
+    color: var(--mantine-color-text);
+    border-width: 0;
+    border-radius: 100px;
+    border: solid var(--mantine-color-red-8);
+
+    &:hover {
+      transform: translateY(-1px);
     }
   }
 }
@@ -37,7 +66,8 @@
     cursor: pointer;
 
     &:hover {
-      color: #43966c; /* A slightly darker green */
+      color: #43966c;
+      /* A slightly darker green */
       transform: translateY(-1px);
       text-decoration: underline;
       text-shadow: 0 2px 4px rgba(69, 165, 117, 0.2);
@@ -78,7 +108,8 @@
     border: 1px solid transparent;
 
     &:hover {
-      border-color: #45a575; /* Gold Accent */
+      border-color: #45a575;
+      /* Gold Accent */
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(69, 165, 117, 0.2);
     }
@@ -86,16 +117,21 @@
 }
 
 .input {
-  border-radius: 100px; /* Matching button radius */
+  border-radius: 100px;
+  /* Matching button radius */
   padding-left: 20px;
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
   border: 1px solid var(--border-color);
-  background-color: var(--mantine-color-body);
+
+  &[data-variant="body-color"] {
+    background-color: var(--mantine-color-body);
+  }
 
   &:hover {
-    border-color: #45a575; /* Your brand green */
+    border-color: #45a575;
+    /* Your brand green */
   }
 
   &:focus {

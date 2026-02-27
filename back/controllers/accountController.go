@@ -64,8 +64,8 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if newAccount.Role != "user" && newAccount.Role != "pro" && newAccount.Role != "employee" {
-		utils.RespondWithError(w, http.StatusBadRequest, "An error occured while creating an account for you.")
+	if newAccount.Role != "user" && newAccount.Role != "pro" && newAccount.Role != "employee" && newAccount.Role != "admin" {
+		utils.RespondWithError(w, http.StatusBadRequest, "Invalid role.")
 		slog.Error("Invalid role", "role", newAccount.Role)
 		return
 	}

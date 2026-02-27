@@ -6,6 +6,7 @@ import (
 	authUtils "backend/utils/auth"
 	"database/sql"
 	"fmt"
+	"log/slog"
 )
 
 // ALL QUERY TO TABLE 'ACCOUNTS'
@@ -40,7 +41,16 @@ func CheckEmailExists(email string) (bool, error) {
 
 func CreateAccount(newAccount models.CreateAccountRequest) error {
 	//hash password
+	isAdmin := false
 	hashedPassword := authUtils.HashPassword(newAccount.Password)
+
+	if newAccount.Role == "admin" || newAccount.Role == "employee" {
+		newAccount.Phone = ""
+	}
+	if newAccount.Role == "admin" {
+		isAdmin = true
+		newAccount.Role = "employee"
+	}
 
 	// insert into 'accounts'
 	var insertedId int
@@ -66,7 +76,8 @@ func CreateAccount(newAccount models.CreateAccountRequest) error {
 		}
 
 	case "employee":
-		_, err := utils.Conn.Exec("INSERT INTO employees(id_account) VALUES ($1);", insertedId)
+		slog.Debug("inserting new employee", "is_admin", isAdmin, "input_role", newAccount.Role)
+		_, err := utils.Conn.Exec("INSERT INTO employees(id_account, is_admin) VALUES ($1, $2);", insertedId, isAdmin)
 		if err != nil {
 			err = DeleteAccount(insertedId)
 			if err != nil {
@@ -76,7 +87,7 @@ func CreateAccount(newAccount models.CreateAccountRequest) error {
 		}
 
 	default:
-		return fmt.Errorf("invalid role '%s'", newAccount.Role)
+		return fmt.Errorf("invalid role '%s'.", newAccount.Role)
 	}
 
 	return nil

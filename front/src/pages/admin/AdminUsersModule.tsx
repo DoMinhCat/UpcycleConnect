@@ -9,17 +9,177 @@ import {
   Stack,
   Pill,
   Group,
-  Text,
+  Modal,
+  PasswordInput,
 } from "@mantine/core";
 import AdminTable from "../../components/admin/AdminTable";
-import { IconSearch, IconChevronDown, IconPlus } from "@tabler/icons-react";
+import { IconSearch, IconPlus, IconLock } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import { getAllAccounts, type Account } from "../../api/admin/userModule";
-import { showNotification } from "@mantine/notifications";
 import dayjs from "dayjs";
+import { useDisclosure } from "@mantine/hooks";
+import {
+  showSuccessNotification,
+  showErrorNotification,
+} from "../../components/NotificationToast";
+import { RegisterRequest } from "../../api/admin/userModule";
+
+const requirements = [
+  { re: /[0-9]/, label: "Includes number" },
+  { re: /[A-Z]/, label: "Includes uppercase letter" },
+  { re: /[$&+,:;=?@#|'<>.^*()%!-]/, label: "Includes special character" },
+];
 
 export default function AdminUsersModule() {
+  const [opened, { open, close }] = useDisclosure(false);
+  // form
+  const [usernameNew, setUsernameNew] = useState<string>("");
+  const [emailNew, setEmailNew] = useState<string>("");
+  const [passwordNew, setPasswordNew] = useState<string>("");
+  const [confirmPasswordNew, setConfirmPasswordNew] = useState<string>("");
+  const [roleNew, setRoleNew] = useState<string>("");
+  const [phoneNew, setPhoneNew] = useState<string>("");
+  // errors
+  const [usernameNewError, setUsernameNewError] = useState<string | null>(null);
+  const [emailNewError, setEmailNewError] = useState<string | null>(null);
+  const [passwordNewError, setPasswordNewError] = useState<string | null>(null);
+  const [confirmPasswordNewError, setConfirmPasswordNewError] = useState<
+    string | null
+  >(null);
+  const [roleNewError, setRoleNewError] = useState<string | null>(null);
+  const [phoneNewError, setPhoneNewError] = useState<string | null>(null);
+  const [disablePhone, setDisablePhone] = useState<boolean>(false);
+
+  const validateUsernameNew = (val: string) => {
+    if (!val) {
+      setUsernameNewError("Username is required");
+      return false;
+    }
+    if (val.length < 4) {
+      setUsernameNewError("Username must be at least 4 characters long");
+      return false;
+    }
+    if (val.length > 20) {
+      setUsernameNewError("Username must be at most 20 characters long");
+      return false;
+    }
+    setUsernameNewError(null);
+    return true;
+  };
+
+  const validateEmailNew = (val: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!val) {
+      setEmailNewError("Email is required");
+      return false;
+    }
+    if (!regex.test(val)) {
+      setEmailNewError("Invalid email format");
+      return false;
+    }
+    setEmailNewError(null);
+    return true;
+  };
+
+  const validatePasswordNew = (val: string) => {
+    if (!val) {
+      setPasswordNewError("Password is required");
+      return false;
+    }
+    if (val.length < 12) {
+      setPasswordNewError("Password must be at least 12 characters long");
+      return false;
+    }
+    if (val.length > 60) {
+      setPasswordNewError("Password must be at most 60 characters long");
+      return false;
+    }
+    if (!requirements.every((requirement) => requirement.re.test(val))) {
+      setPasswordNewError(
+        "Password must contain at least one number, one uppercase letter, and one special character",
+      );
+      return false;
+    }
+    setPasswordNewError(null);
+    return true;
+  };
+
+  const validateConfirmPasswordNew = (val: string) => {
+    if (!val) {
+      setConfirmPasswordNewError("Confirm password is required");
+      return false;
+    }
+    if (val !== passwordNew) {
+      setConfirmPasswordNewError("Passwords do not match");
+      return false;
+    }
+    setConfirmPasswordNewError(null);
+    return true;
+  };
+
+  const validatePhoneNew = (val: string) => {
+    if (val.length !== 0) {
+      if (!val.match(/^[0-9]+$/)) {
+        setPhoneNewError("Phone number must contain only numbers");
+        return false;
+      }
+      if (val.length < 10) {
+        setPhoneNewError("Phone must be at least 10 characters long");
+        return false;
+      }
+      if (val.length > 15) {
+        setPhoneNewError("Phone must be at most 15 characters long");
+        return false;
+      }
+      setPhoneNewError(null);
+      return true;
+    }
+  };
+
+  const validateRoleNew = (val: string) => {
+    if (!val) {
+      setRoleNewError("Role is required");
+      return false;
+    }
+    setRoleNewError(null);
+    return true;
+  };
+
+  const handleCreateAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (
+      !validateUsernameNew(usernameNew) ||
+      !validateEmailNew(emailNew) ||
+      !validatePasswordNew(passwordNew) ||
+      !validateConfirmPasswordNew(confirmPasswordNew) ||
+      !validateRoleNew(roleNew)
+    )
+      return;
+    setIsLoading(true);
+    try {
+      const response = await RegisterRequest({
+        username: usernameNew,
+        email: emailNew,
+        password: passwordNew,
+        role: roleNew,
+      });
+      if (response.status === 201) {
+        showSuccessNotification(
+          "Account creation success",
+          "Account created successfully.",
+        );
+        close();
+      } else {
+        showErrorNotification("Account creation failed", response.data.error);
+      }
+    } catch (error: any) {
+      showErrorNotification("Account creation failed", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [filters, setFilters] = useState<{
@@ -40,11 +200,7 @@ export default function AdminUsersModule() {
         const response = await getAllAccounts();
         setAccounts(response);
       } catch (error) {
-        showNotification({
-          title: "Error",
-          message: "Failed to fetch accounts",
-          color: "red",
-        });
+        showErrorNotification("Error", "Failed to fetch accounts");
       } finally {
         setIsLoading(false);
       }
@@ -144,7 +300,6 @@ export default function AdminUsersModule() {
       </Title>
 
       <Stack gap="md" mb="xl">
-        {/* Row 1: Header & Main Actions */}
         <Group justify="space-between" align="flex-end">
           <div>
             <Title c="dimmed" order={3}>
@@ -152,7 +307,104 @@ export default function AdminUsersModule() {
             </Title>
           </div>
 
-          <Button variant="primary" leftSection={<IconPlus size={16} />}>
+          <Modal opened={opened} onClose={close} title="New Account" centered>
+            <Stack>
+              <TextInput
+                data-autofocus
+                withAsterisk
+                label="Username"
+                placeholder="Username"
+                onChange={(e) => {
+                  setUsernameNew(e.target.value);
+                  validateUsernameNew(e.target.value);
+                }}
+                onBlur={() => validateUsernameNew(usernameNew)}
+                error={usernameNewError}
+                required
+              />
+              <TextInput
+                withAsterisk
+                label="Email"
+                placeholder="Email"
+                onChange={(e) => {
+                  setEmailNew(e.target.value);
+                  validateEmailNew(e.target.value);
+                }}
+                onBlur={() => validateEmailNew(emailNew)}
+                error={emailNewError}
+                required
+              />
+              <PasswordInput
+                withAsterisk
+                leftSection={<IconLock size={14} />}
+                label="Password"
+                placeholder="Password"
+                onChange={(e) => {
+                  setPasswordNew(e.target.value);
+                  validatePasswordNew(e.target.value);
+                }}
+                onBlur={() => validatePasswordNew(passwordNew)}
+                error={passwordNewError}
+                required
+              />
+              <PasswordInput
+                withAsterisk
+                leftSection={<IconLock size={14} />}
+                label="Confirm Password"
+                placeholder="Confirm Password"
+                onChange={(e) => {
+                  setConfirmPasswordNew(e.target.value);
+                  validateConfirmPasswordNew(e.target.value);
+                }}
+                onBlur={() => validateConfirmPasswordNew(confirmPasswordNew)}
+                error={confirmPasswordNewError}
+                required
+              />
+              <TextInput
+                label="Phone"
+                placeholder="Phone"
+                onChange={(e) => {
+                  setPhoneNew(e.target.value);
+                  validatePhoneNew(e.target.value);
+                }}
+                onBlur={() => validatePhoneNew(phoneNew)}
+                error={phoneNewError}
+                disabled={disablePhone}
+              />
+              <Select
+                withAsterisk
+                clearable
+                label="Role"
+                error={roleNewError}
+                onBlur={() => validateRoleNew(roleNew)}
+                placeholder="Role"
+                data={[
+                  { value: "user", label: "User" },
+                  { value: "pro", label: "Pro" },
+                  { value: "employee", label: "Employee" },
+                  { value: "admin", label: "Admin" },
+                ]}
+                onChange={(value) => {
+                  setRoleNew(value as string);
+                  if (value === "admin" || value === "employee") {
+                    setPhoneNew("");
+                    setPhoneNewError(null);
+                    setDisablePhone(true);
+                  } else {
+                    setDisablePhone(false);
+                  }
+                }}
+              />
+              <Button variant="primary" onClick={handleCreateAccount}>
+                Create Account
+              </Button>
+            </Stack>
+          </Modal>
+          <Button
+            variant="primary"
+            leftSection={<IconPlus size={16} />}
+            onClick={open}
+          >
             New Account
           </Button>
         </Group>

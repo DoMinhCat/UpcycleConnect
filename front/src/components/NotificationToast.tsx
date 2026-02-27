@@ -63,4 +63,24 @@ export const showInfoNotification = (title = "Info", message: string) => {
   });
 };
 
-// TODO: success (and warning) noti
+export const showSuccessNotification = (title = "Success", message: string) => {
+  // default title is "Success" if not provided any title
+  notifications.show({
+    title: title,
+    message: message,
+    color: "green",
+    autoClose: autoCloseDuration,
+    styles: {
+      root: {
+        border: "1px solid var(--border-color)",
+        borderRadius: "var(--mantine-radius-md)",
+        padding: "var(--mantine-spacing-lg)",
+        boxShadow: "var(--mantine-shadow-lg)",
+
+        "&::before": {
+          backgroundColor: "var(--mantine-color-green-6)",
+        },
+      },
+    },
+  });
+};

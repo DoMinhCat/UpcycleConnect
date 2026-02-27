@@ -17,7 +17,6 @@ import { useAuth } from "../../context/AuthContext";
 import { showErrorNotification } from "../NotificationToast";
 
 export function LoginForm() {
-
   const navigate = useNavigate();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
@@ -94,7 +93,11 @@ export function LoginForm() {
             radius="md"
             error={emailError}
             mb="md"
-            onChange={(event) => { const email = event.currentTarget.value; setEmail(email); validateEmail(email); }}
+            onChange={(event) => {
+              const email = event.currentTarget.value;
+              setEmail(email);
+              validateEmail(email);
+            }}
             onBlur={() => validateEmail(email)}
             disabled={isLoading}
             required
@@ -103,7 +106,11 @@ export function LoginForm() {
             variant="body-color"
             label="Password"
             placeholder="Your secret"
-            onChange={(event) => { const password = event.currentTarget.value; setPassword(password); validatePassword(password); }}
+            onChange={(event) => {
+              const password = event.currentTarget.value;
+              setPassword(password);
+              validatePassword(password);
+            }}
             onBlur={() => validatePassword(password)}
             disabled={isLoading}
             error={passwordError}
@@ -129,5 +136,4 @@ export function LoginForm() {
       </Paper>
     </Container>
   );
-
 }

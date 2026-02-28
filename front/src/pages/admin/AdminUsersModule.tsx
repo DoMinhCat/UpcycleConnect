@@ -16,7 +16,11 @@ import AdminTable from "../../components/admin/AdminTable";
 import { IconSearch, IconPlus, IconLock } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
-import { getAllAccounts, type Account } from "../../api/admin/userModule";
+import {
+  deleteAccount,
+  getAllAccounts,
+  type Account,
+} from "../../api/admin/userModule";
 import dayjs from "dayjs";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -32,7 +36,10 @@ const requirements = [
 ];
 
 export default function AdminUsersModule() {
-  const [opened, { open, close }] = useDisclosure(false);
+  const [openedCreate, { open: openCreate, close: closeCreate }] =
+    useDisclosure(false);
+  const [openedDelete, { open: openDelete, close: closeDelete }] =
+    useDisclosure(false);
   // form
   const [usernameNew, setUsernameNew] = useState<string>("");
   const [emailNew, setEmailNew] = useState<string>("");
@@ -180,6 +187,14 @@ export default function AdminUsersModule() {
     }
   };
 
+  // handle delete account confirmation modals
+  const [selectedDeleteAcc, setSelectedDeleteAcc] = useState<Account | null>(
+    null,
+  );
+  const handleModalDelete = (account: Account) => {
+    setSelectedDeleteAcc(account);
+    openDelete();
+  };
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [filters, setFilters] = useState<{
@@ -279,7 +294,12 @@ export default function AdminUsersModule() {
             <Button variant="edit" me="sm" size="xs">
               Edit
             </Button>
-            <Button variant="delete" size="xs">
+            <Button
+              disabled={account.role === "admin"}
+              variant="delete"
+              size="xs"
+              onClick={() => handleModalDelete(account)}
+            >
               Delete
             </Button>
           </Table.Td>
@@ -293,6 +313,27 @@ export default function AdminUsersModule() {
       </Table.Tr>
     );
 
+  const handleDeleteAccount = async () => {
+    closeDelete();
+    if (selectedDeleteAcc?.id) {
+      try {
+        setIsLoading(true);
+        const response = await deleteAccount(selectedDeleteAcc.id);
+        if (response.status === 204) {
+          showSuccessNotification(
+            "Account deleted",
+            "Account deleted successfully.",
+          );
+        } else {
+          showErrorNotification("Account deletion failed", response.data.error);
+        }
+      } catch (error: any) {
+        showErrorNotification("Account deletion failed", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
   return (
     <Container px="md" size="xl">
       <Title order={2} mt="lg" mb="xl">
@@ -307,7 +348,12 @@ export default function AdminUsersModule() {
             </Title>
           </div>
 
-          <Modal opened={opened} onClose={close} title="New Account" centered>
+          <Modal
+            opened={openedCreate}
+            onClose={closeCreate}
+            title="New Account"
+            centered
+          >
             <Stack>
               <TextInput
                 data-autofocus
@@ -395,7 +441,11 @@ export default function AdminUsersModule() {
                   }
                 }}
               />
-              <Button variant="primary" onClick={handleCreateAccount}>
+              <Button
+                variant="primary"
+                onClick={handleCreateAccount}
+                loading={isLoading}
+              >
                 Create Account
               </Button>
             </Stack>
@@ -403,7 +453,7 @@ export default function AdminUsersModule() {
           <Button
             variant="primary"
             leftSection={<IconPlus size={16} />}
-            onClick={open}
+            onClick={openCreate}
           >
             New Account
           </Button>
@@ -510,6 +560,29 @@ export default function AdminUsersModule() {
       >
         {listUsers}
       </AdminTable>
+      <Modal
+        title="Delete this account?"
+        opened={openedDelete}
+        onClose={closeDelete}
+      >
+        Are you sure you want to delete this account? This account will be soft
+        deleted.
+        <Group mt="lg" justify="flex-end">
+          <Button onClick={closeDelete} variant="grey">
+            Cancel
+          </Button>
+          <Button
+            // TODO
+            onClick={() => {
+              handleDeleteAccount();
+            }}
+            variant="delete"
+            loading={isLoading}
+          >
+            Delete
+          </Button>
+        </Group>
+      </Modal>
     </Container>
   );
 }

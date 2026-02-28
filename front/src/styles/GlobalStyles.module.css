@@ -56,6 +56,17 @@
       transform: translateY(-1px);
     }
   }
+  &[data-variant="grey"] {
+    background-color: var(--mantine-color-gray-6);
+    color: var(--mantine-color-text);
+    border-width: 0;
+    border-radius: 100px;
+    border: solid var(--mantine-color-gray-8);
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+  }
 }
 
 .text {

@@ -6,7 +6,6 @@ import (
 	authUtils "backend/utils/auth"
 	"database/sql"
 	"fmt"
-	"log/slog"
 )
 
 // ALL QUERY TO TABLE 'ACCOUNTS'
@@ -76,54 +75,15 @@ func CreateAccount(newAccount models.CreateAccountRequest) error {
 		}
 
 	case "employee":
-		slog.Debug("inserting new employee", "is_admin", isAdmin, "input_role", newAccount.Role)
-		_, err := utils.Conn.Exec("INSERT INTO employees(id_account, is_admin) VALUES ($1, $2);", insertedId, isAdmin)
+		err = CreateEmployee(insertedId, isAdmin)
 		if err != nil {
-			err = DeleteAccount(insertedId)
-			if err != nil {
-				return fmt.Errorf("error rolling back after failed insertion into 'employees': %w", err)
-			}
-			return fmt.Errorf("CreateAccount() failed: %w", err)
+			return err
 		}
 
 	default:
 		return fmt.Errorf("invalid role '%s'.", newAccount.Role)
 	}
 
-	return nil
-}
-
-func CreateUser(newAccount models.CreateAccountRequest, accountID int) error {
-	var err error
-	if newAccount.Phone != "" {
-		_, err = utils.Conn.Exec("INSERT INTO users(id_account, phone) VALUES ($1, $2);", accountID, newAccount.Phone)
-	} else {
-		_, err = utils.Conn.Exec("INSERT INTO users(id_account) VALUES ($1);", accountID)
-	}
-	if err != nil {
-		err = DeleteAccount(accountID)
-		if err != nil {
-			return fmt.Errorf("error rolling back after failed insertion into 'users': %w", err)
-		}
-		return fmt.Errorf("CreateUser() failed: %w", err)
-	}
-	return nil
-}
-
-func CreatePro(newAccount models.CreateAccountRequest, accountID int) error {
-	var err error
-	if newAccount.Phone != "" {
-		_, err = utils.Conn.Exec("INSERT INTO pros(id_account, phone) VALUES ($1, $2);", accountID, newAccount.Phone)
-	} else {
-		_, err = utils.Conn.Exec("INSERT INTO pros(id_account) VALUES ($1);", accountID)
-	}
-	if err != nil {
-		err = DeleteAccount(accountID)
-		if err != nil {
-			return fmt.Errorf("error rolling back after failed insertion into 'pros': %w", err)
-		}
-		return fmt.Errorf("CreatePro() failed: %w", err)
-	}
 	return nil
 }
 
@@ -137,10 +97,11 @@ func DeleteAccount(id int) error {
 	return nil
 }
 
+// get account not soft deleted
 func GetAllAccounts() ([]models.Account, error) {
 	var accounts []models.Account
 
-	rows, err := utils.Conn.Query("SELECT id, email, username, role, is_banned, created_at FROM accounts")
+	rows, err := utils.Conn.Query("SELECT id, email, username, role, is_banned, created_at FROM accounts WHERE deleted_at IS NULL")
 	if err != nil {
 		return nil, fmt.Errorf("GetAllAccounts() failed: %v", err.Error())
 	}
@@ -164,4 +125,19 @@ func GetAllAccounts() ([]models.Account, error) {
 	}
 
 	return accounts, nil
+}
+
+func CheckAccountExistsById(id_account int) (bool, error) {
+	var exists bool
+
+	err := utils.Conn.QueryRow("SELECT EXISTS(SELECT 1 FROM accounts WHERE id=$1 AND deleted_at IS NULL)", id_account).Scan(&exists)
+	return exists, err
+}
+
+func SoftDeleteAccount(id_account int) error {
+	_, err := utils.Conn.Exec("UPDATE accounts SET deleted_at=NOW() WHERE id=$1;", id_account)
+	if err != nil {
+		return fmt.Errorf("SoftDeleteAccount() failed: %v", err.Error())
+	}
+	return nil
 }

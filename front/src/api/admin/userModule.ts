@@ -26,3 +26,7 @@ export interface RegisterPayload {
 export const RegisterRequest = async (payload: RegisterPayload) => {
   return await api.post(ENDPOINTS.ACCOUNT.REGISTER, payload);
 };
+
+export const deleteAccount = async (id_account: number) => {
+  return await api.delete(ENDPOINTS.ADMIN.USERS + "/" + id_account + "/");
+};

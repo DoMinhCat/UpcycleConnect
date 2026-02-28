@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 	"regexp"
+	"strconv"
 )
 
 func CreateAccount(w http.ResponseWriter, r *http.Request) {
@@ -110,4 +111,50 @@ func GetAllAccounts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.RespondWithJSON(w, http.StatusOK, accounts)
+}
+
+func SoftDeleteAccount(w http.ResponseWriter, r *http.Request) {
+	// get id to delete
+	id_input := r.PathValue("id_account")
+	id_account, err := strconv.Atoi(id_input)
+	if err != nil {
+		utils.RespondWithError(w, http.StatusBadRequest, "An error occurred while soft deleting an account.")
+		slog.Error("SoftDeleteAccount() failed", "error", err)
+		return
+	}
+
+	// does account exists/not already deleted?
+	exists, err := db.CheckAccountExistsById(id_account)
+	if err != nil {
+		utils.RespondWithError(w, http.StatusInternalServerError, "An error occurred while soft deleting an account.")
+		slog.Error("SoftDeleteAccount() failed", "error", err)
+		return
+	}
+	if !exists {
+		utils.RespondWithError(w, http.StatusNotFound, "Account not found or already deleted.")
+		slog.Error("SoftDeleteAccount() failed", "error", "account not found")
+		return
+	}
+
+	// can't delete admins
+	isAdmin, err := db.CheckIsAdmin(id_account)
+	if err != nil {
+		utils.RespondWithError(w, http.StatusInternalServerError, "An error occurred while soft deleting an account.")
+		slog.Error("SoftDeleteAccount() failed", "error", err)
+		return
+	}
+	if isAdmin {
+		utils.RespondWithError(w, http.StatusForbidden, "Admins cannot be soft deleted.")
+		slog.Error("SoftDeleteAccount() failed", "error", "admin cannot be soft deleted")
+		return
+	}
+
+	err = db.SoftDeleteAccount(id_account)
+	if err != nil {
+		utils.RespondWithError(w, http.StatusInternalServerError, "An error occurred while soft deleting an account.")
+		slog.Error("SoftDeleteAccount() failed", "error", err)
+		return
+	}
+
+	utils.RespondWithJSON(w, http.StatusNoContent, nil)
 }

@@ -15,7 +15,8 @@ import {
 import AdminTable from "../../components/admin/AdminTable";
 import { IconSearch, IconPlus, IconLock } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   deleteAccount,
   getAllAccounts,
@@ -36,6 +37,7 @@ const requirements = [
 ];
 
 export default function AdminUsersModule() {
+  const queryClient = useQueryClient();
   const [openedCreate, { open: openCreate, close: closeCreate }] =
     useDisclosure(false);
   const [openedDelete, { open: openDelete, close: closeDelete }] =
@@ -153,6 +155,25 @@ export default function AdminUsersModule() {
     return true;
   };
 
+  const createMutation = useMutation({
+    mutationFn: RegisterRequest,
+    onSuccess: (response) => {
+      if (response.status === 201) {
+        showSuccessNotification(
+          "Account creation success",
+          "Account created successfully.",
+        );
+        closeCreate();
+        queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      } else {
+        showErrorNotification("Account creation failed", response.data.error);
+      }
+    },
+    onError: (error: any) => {
+      showErrorNotification("Account creation failed", error);
+    },
+  });
+
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     if (
@@ -163,28 +184,12 @@ export default function AdminUsersModule() {
       !validateRoleNew(roleNew)
     )
       return;
-    setIsLoading(true);
-    try {
-      const response = await RegisterRequest({
-        username: usernameNew,
-        email: emailNew,
-        password: passwordNew,
-        role: roleNew,
-      });
-      if (response.status === 201) {
-        showSuccessNotification(
-          "Account creation success",
-          "Account created successfully.",
-        );
-        close();
-      } else {
-        showErrorNotification("Account creation failed", response.data.error);
-      }
-    } catch (error: any) {
-      showErrorNotification("Account creation failed", error);
-    } finally {
-      setIsLoading(false);
-    }
+    createMutation.mutate({
+      username: usernameNew,
+      email: emailNew,
+      password: passwordNew,
+      role: roleNew,
+    });
   };
 
   // handle delete account confirmation modals
@@ -196,7 +201,6 @@ export default function AdminUsersModule() {
     openDelete();
   };
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [filters, setFilters] = useState<{
     searchValue: string | undefined;
     sortValue: string | null;
@@ -207,22 +211,11 @@ export default function AdminUsersModule() {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      setIsLoading(true);
-      try {
-        const response = await getAllAccounts();
-        setAccounts(response);
-      } catch (error) {
-        showErrorNotification("Error", "Failed to fetch accounts");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAccounts();
-  }, []);
+  const { data: accounts = [] as Account[], isLoading: isAccountsLoading } =
+    useQuery<Account[]>({
+      queryKey: ["accounts"],
+      queryFn: getAllAccounts,
+    });
   const filteredAccounts = useMemo(() => {
     const result = accounts.filter((account) => {
       const matchesSearch =
@@ -313,25 +306,28 @@ export default function AdminUsersModule() {
       </Table.Tr>
     );
 
-  const handleDeleteAccount = async () => {
-    closeDelete();
-    if (selectedDeleteAcc?.id) {
-      try {
-        setIsLoading(true);
-        const response = await deleteAccount(selectedDeleteAcc.id);
-        if (response.status === 204) {
-          showSuccessNotification(
-            "Account deleted",
-            "Account deleted successfully.",
-          );
-        } else {
-          showErrorNotification("Account deletion failed", response.data.error);
-        }
-      } catch (error: any) {
-        showErrorNotification("Account deletion failed", error);
-      } finally {
-        setIsLoading(false);
+  const deleteMutation = useMutation({
+    mutationFn: deleteAccount,
+    onSuccess: (response) => {
+      if (response.status === 204) {
+        showSuccessNotification(
+          "Account deleted",
+          "Account deleted successfully.",
+        );
+        closeDelete();
+        queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      } else {
+        showErrorNotification("Account deletion failed", response.data.error);
       }
+    },
+    onError: (error: any) => {
+      showErrorNotification("Account deletion failed", error);
+    },
+  });
+
+  const handleDeleteAccount = async () => {
+    if (selectedDeleteAcc?.id) {
+      deleteMutation.mutate(selectedDeleteAcc.id);
     }
   };
   return (
@@ -444,7 +440,7 @@ export default function AdminUsersModule() {
               <Button
                 variant="primary"
                 onClick={handleCreateAccount}
-                loading={isLoading}
+                loading={createMutation.isPending}
               >
                 Create Account
               </Button>
@@ -546,7 +542,7 @@ export default function AdminUsersModule() {
         </Grid>
       </Stack>
       <AdminTable
-        loading={isLoading}
+        loading={isAccountsLoading}
         header={[
           "Registered on",
           "ID",
@@ -577,7 +573,7 @@ export default function AdminUsersModule() {
               handleDeleteAccount();
             }}
             variant="delete"
-            loading={isLoading}
+            loading={deleteMutation.isPending}
           >
             Delete
           </Button>

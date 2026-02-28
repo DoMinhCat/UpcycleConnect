@@ -5,11 +5,16 @@ import App from "./App.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </QueryClientProvider>
   </StrictMode>,
 );

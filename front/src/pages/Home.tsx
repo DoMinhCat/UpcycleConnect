@@ -1,4 +1,5 @@
 // src/pages/Home.tsx
+import { useEffect } from "react";
 import { isTokenExpired } from "../api/auth";
 import AdminHome from "./admin/AdminHome";
 // import ProHome from "./ProHome";
@@ -10,9 +11,14 @@ import { PATHS } from "../routes/paths";
 const Home = () => {
   const { user, logout } = useAuth();
 
+  useEffect(() => {
+    if (!user || isTokenExpired()) {
+      logout();
+    }
+  }, [user, logout]);
+
   // handle expired token
   if (!user || isTokenExpired()) {
-    logout();
     // TODO: home page for guest
     // return <GuestHome />;
 

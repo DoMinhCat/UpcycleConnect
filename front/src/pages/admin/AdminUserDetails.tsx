@@ -1,16 +1,19 @@
 import {
   Avatar,
+  Box,
   Container,
   Flex,
   Paper,
+  PasswordInput,
   Stack,
   Text,
   Title,
+  Button,
 } from "@mantine/core";
 import { PATHS } from "../../routes/paths";
 import AdminBreadcrumbs from "../../components/admin/AdminBreadcrumbs";
 import { ScoreRing } from "../../components/ScoreRing";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getAccountDetails, type Account } from "../../api/admin/userModule";
 import { Navigate, useParams } from "react-router-dom";
 import { showErrorNotification } from "../../components/NotificationToast";
@@ -18,8 +21,22 @@ import { useQuery } from "@tanstack/react-query";
 import FullScreenLoader from "../../components/FullScreenLoader";
 import InfoField from "../../components/InfoField";
 import dayjs from "dayjs";
+import PasswordStrengthInput, {
+  requirements,
+} from "../../components/PasswordStrengthInput";
+import { IconLock } from "@tabler/icons-react";
 
 export default function AdminUserDetails() {
+  // states for password form
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [isLoadingPasswordForm, setIsLoadingPasswordForm] =
+    useState<boolean>(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [confirmPasswordError, setConfirmPasswordError] = useState<
+    string | null
+  >(null);
+
   const params = useParams();
   const accountId: number = params.id ? parseInt(params.id) : 0;
   const isValidId = !isNaN(accountId) && accountId > 0;
@@ -48,6 +65,43 @@ export default function AdminUserDetails() {
   }
 
   const role = accountDetails?.role;
+
+  //validations
+  const validatePassword = (val: string) => {
+    if (!val) {
+      setPasswordError("Password is required");
+      return false;
+    }
+    if (val.length < 12) {
+      setPasswordError("Password must be at least 12 characters long");
+      return false;
+    }
+    if (val.length > 60) {
+      setPasswordError("Password must be at most 60 characters long");
+      return false;
+    }
+    if (!requirements.every((requirement) => requirement.re.test(val))) {
+      setPasswordError(
+        "Password must contain at least one number, one uppercase letter, and one special character",
+      );
+      return false;
+    }
+    setPasswordError(null);
+    return true;
+  };
+
+  const validateConfirmPassword = (val: string) => {
+    if (!val) {
+      setConfirmPasswordError("You must confirm your password");
+      return false;
+    } else if (val !== password) {
+      setConfirmPasswordError("Passwords do not match");
+      return false;
+    }
+    setConfirmPasswordError(null);
+    return true;
+  };
+
   return (
     <Container px="md" size="xl">
       <AdminBreadcrumbs
@@ -227,6 +281,73 @@ export default function AdminUserDetails() {
               </InfoField>
             </>
           )}
+        </Paper>
+
+        <Title order={3} ta="left" mt="xl" c="red">
+          Danger zone
+        </Title>
+        <Paper variant="primary" px="lg" py="md" mt="sm">
+          <InfoField label="Change password">
+            <Box ps="sm" mb="xl">
+              <Text mt="xs" mb="xs" c="dimmed">
+                Assign a new password for this account
+              </Text>
+              <PasswordStrengthInput
+                w="50%"
+                variant="body-color"
+                placeholder="New password"
+                value={password}
+                disabled={isLoadingPasswordForm}
+                leftSection={<IconLock size={14} />}
+                onChange={(event) => {
+                  const value = event.currentTarget.value;
+                  setPassword(value);
+                  validatePassword(value);
+                }}
+                error={passwordError}
+                required
+              />
+              <PasswordInput
+                leftSection={<IconLock size={14} />}
+                variant="body-color"
+                w="50%"
+                mt="xs"
+                placeholder="Confirm new password"
+                onChange={(event) => {
+                  const value = event.currentTarget.value;
+                  setConfirmPassword(value);
+                  validateConfirmPassword(value);
+                }}
+                disabled={isLoadingPasswordForm}
+                error={confirmPasswordError}
+                required
+              />
+              <Button mt="md" variant="delete">
+                Change password
+              </Button>
+            </Box>
+          </InfoField>
+          <InfoField label="Ban account">
+            <Box ps="sm" mb="xl">
+              <Text c="dimmed" mt="xs">
+                This account will not be able to log in until an admin unban it
+              </Text>
+              <Button mt="xs" variant="delete">
+                Ban account
+              </Button>
+            </Box>
+          </InfoField>
+
+          <InfoField label="Delete account">
+            <Box ps="sm" mb="xl">
+              <Text c="dimmed" mt="xs">
+                This account be soft deleted
+              </Text>
+              <Button mt="xs" variant="delete">
+                Delete account
+              </Button>
+            </Box>
+          </InfoField>
         </Paper>
       </Container>
     </Container>

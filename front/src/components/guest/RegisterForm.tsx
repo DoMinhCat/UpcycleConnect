@@ -10,9 +10,6 @@ import {
   Fieldset,
   Stack,
   Button,
-  Popover,
-  Progress,
-  Box,
   Divider,
 } from "@mantine/core";
 import { IconCheck, IconLock, IconX } from "@tabler/icons-react";
@@ -25,60 +22,12 @@ import {
   showSuccessNotification,
 } from "../NotificationToast";
 import { Link } from "react-router-dom";
-
-const requirements = [
-  { re: /[0-9]/, label: "Includes number" },
-  { re: /[A-Z]/, label: "Includes uppercase letter" },
-  { re: /[$&+,:;=?@#|'<>.^*()%!-]/, label: "Includes special character" },
-];
-
-function getStrength(password: string) {
-  let multiplier = password.length > 11 ? 0 : 1;
-
-  requirements.forEach((requirement) => {
-    if (!requirement.re.test(password)) {
-      multiplier += 1;
-    }
-  });
-
-  return Math.max(100 - (100 / (requirements.length + 1)) * multiplier, 10);
-}
-
-function PasswordRequirement({
-  meets,
-  label,
-}: {
-  meets: boolean;
-  label: string;
-}) {
-  return (
-    <Text
-      component="div"
-      c={meets ? "teal" : "red"}
-      style={{ display: "flex", alignItems: "center" }}
-      mt={7}
-      size="sm"
-    >
-      {meets ? <IconCheck size={14} /> : <IconX size={14} />}
-      <Box ml={10}>{label}</Box>
-    </Text>
-  );
-}
+import PasswordStrengthInput, { requirements } from "../PasswordStrengthInput";
 
 export default function RegisterForm() {
   const navigate = useNavigate();
   // password
-  const [popoverOpened, setPopoverOpened] = useState(false);
   const [password, setPassword] = useState("");
-  const checks = requirements.map((requirement, index) => (
-    <PasswordRequirement
-      key={index}
-      label={requirement.label}
-      meets={requirement.re.test(password)}
-    />
-  ));
-  const strength = getStrength(password);
-  const color = strength === 100 ? "teal" : strength > 50 ? "yellow" : "red";
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const validatePassword = (val: string) => {
     if (!val) {
@@ -255,50 +204,26 @@ export default function RegisterForm() {
                 setEmail(value);
                 validateEmail(value);
               }}
-              onBlur={() => validateEmail(email)}
               disabled={isLoading}
               required
             />
 
-            <Popover
-              opened={popoverOpened}
-              position="bottom"
-              width="target"
-              transitionProps={{ transition: "pop" }}
-            >
-              <Popover.Target>
-                <PasswordInput
-                  variant="body-color"
-                  withAsterisk
-                  label="Password"
-                  placeholder="Your super secret"
-                  value={password}
-                  disabled={isLoading}
-                  leftSection={<IconLock size={14} />}
-                  onFocus={() => setPopoverOpened(true)}
-                  onBlur={() => setPopoverOpened(false)}
-                  onChange={(event) => {
-                    const value = event.currentTarget.value;
-                    setPassword(value);
-                    validatePassword(value);
-                  }}
-                  error={passwordError}
-                  required
-                />
-              </Popover.Target>
-
-              <Popover.Dropdown>
-                <Stack gap="xs">
-                  <Progress color={color} value={strength} size={5} mb="xs" />
-
-                  <PasswordRequirement
-                    label="Includes at least 12 characters"
-                    meets={password.length > 11}
-                  />
-                  {checks}
-                </Stack>
-              </Popover.Dropdown>
-            </Popover>
+            <PasswordStrengthInput
+              variant="body-color"
+              withAsterisk
+              label="Password"
+              placeholder="Your super secret"
+              value={password}
+              disabled={isLoading}
+              leftSection={<IconLock size={14} />}
+              onChange={(event) => {
+                const value = event.currentTarget.value;
+                setPassword(value);
+                validatePassword(value);
+              }}
+              error={passwordError}
+              required
+            />
 
             <PasswordInput
               label="Confirm Password"
@@ -333,7 +258,6 @@ export default function RegisterForm() {
                 setUsername(value);
                 validateUsername(value);
               }}
-              onBlur={() => validateUsername(Username)}
               disabled={isLoading}
               required
             />
@@ -350,7 +274,6 @@ export default function RegisterForm() {
                 setPhone(value);
                 validatePhone(value);
               }}
-              onBlur={() => validatePhone(phone)}
               disabled={isLoading}
             />
           </Fieldset>

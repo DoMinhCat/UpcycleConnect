@@ -190,7 +190,6 @@ export default function AdminUsersModule() {
       email: emailNew,
       password: passwordNew,
       role: roleNew,
-      source: "admin",
     });
   };
 
@@ -329,7 +328,7 @@ export default function AdminUsersModule() {
     );
 
   const deleteMutation = useMutation({
-    mutationFn: (id_account: number) => deleteAccount(id_account, "admin"),
+    mutationFn: (id_account: number) => deleteAccount(id_account),
     onSuccess: (response) => {
       if (response?.status === 204) {
         showSuccessNotification(

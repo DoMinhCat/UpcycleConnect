@@ -202,7 +202,6 @@ export default function RegisterForm() {
         username: Username,
         phone,
         role,
-        source: "guest",
       });
       if (response?.status === 201) {
         // redirect

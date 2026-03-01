@@ -21,21 +21,12 @@ export interface RegisterPayload {
   username: string;
   phone?: string;
   role: string;
-  source: string;
 }
 
 export const RegisterRequest = async (payload: RegisterPayload) => {
-  if (payload.source === "admin") {
-    return await api.post(ENDPOINTS.ADMIN.REGISTER, payload);
-  } else if (payload.source === "guest") {
-    return await api.post(ENDPOINTS.GUEST.REGISTER, payload);
-  }
+  return await api.post(ENDPOINTS.AUTH.REGISTER, payload);
 };
 
-export const deleteAccount = async (id_account: number, source: string) => {
-  if (source === "admin") {
-    return await api.delete(ENDPOINTS.ADMIN.USERS + id_account + "/");
-  } else if (source === "user") {
-    return await api.delete(ENDPOINTS.USER.DELETE + id_account + "/");
-  }
+export const deleteAccount = async (id_account: number) => {
+  return await api.delete(ENDPOINTS.ADMIN.USERS + id_account + "/");
 };

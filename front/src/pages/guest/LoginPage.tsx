@@ -2,17 +2,34 @@ import { Grid } from "@mantine/core";
 import { LoginForm } from "../../components/guest/LoginForm";
 import classes from "../../styles/GlobalStyles.module.css";
 import { isTokenExpired } from "../../api/auth";
-import { Navigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { PATHS } from "../../routes/paths";
 import { useAuth } from "../../context/AuthContext";
+import { useEffect } from "react";
 
 export default function Login() {
-  const { user } = useAuth();
+  const { user, isInitializing } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  if (user && !isTokenExpired()) {
-    if (user.role == "admin") return <Navigate to={PATHS.ADMIN.HOME} replace />;
-    else return <Navigate to={PATHS.HOME} replace />;
-  }
+  useEffect(() => {
+    if (!isInitializing && user && !isTokenExpired()) {
+      const origin = location.state?.from?.pathname;
+
+      if (origin) {
+        navigate(origin, { replace: true });
+      } else {
+        if (user.role === "admin") {
+          navigate(PATHS.ADMIN.HOME, { replace: true });
+        } else {
+          navigate(PATHS.HOME, { replace: true });
+        }
+      }
+    }
+  }, [user, isInitializing, location, navigate]);
+
+  if (isInitializing) return null;
+
   return (
     <div className={classes.main}>
       <Grid justify="center" align="center" style={{ width: "100%" }}>

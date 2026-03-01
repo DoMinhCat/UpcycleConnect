@@ -1,27 +1,26 @@
-import { type RouteObject, useNavigate } from "react-router-dom";
+import { type RouteObject, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { PATHS } from "./paths";
 import { useEffect } from "react";
-import { Center, Loader } from "@mantine/core";
+import FullScreenLoader from "../components/FullScreenLoader";
 
 const UserGuard = ({ children }: { children: React.ReactNode }) => {
   const { user, isInitializing } = useAuth();
-  const unauthorized = !user || user.role !== "admin";
   const navigate = useNavigate();
+  const location = useLocation();
+  const unauthorized = !user || user.role !== "admin";
 
   useEffect(() => {
     if (unauthorized) {
-      navigate(PATHS.GUEST.LOGIN, { replace: true });
+      navigate(PATHS.GUEST.LOGIN, { replace: true, state: { from: location } });
     }
   }, [unauthorized]);
 
   if (isInitializing) {
-    return (
-      <Center style={{ width: "100vw", height: "100vh" }}>
-        <Loader size="xl" />
-      </Center>
-    );
+    return <FullScreenLoader />;
   }
+  if (unauthorized) return null;
+
   return <>{children}</>;
 };
 

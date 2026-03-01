@@ -20,15 +20,16 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     if (
-      error.response.status === 401 &&
+      error.response?.status === 401 &&
       !originalRequest._retry &&
-      originalRequest.url !== ENDPOINTS.AUTH.REFRESH
+      originalRequest.url !== ENDPOINTS.AUTH.REFRESH &&
+      originalRequest.url !== ENDPOINTS.AUTH.LOGIN
     ) {
       originalRequest._retry = true;
       try {
-        const response = await getNewAccessToken();
-        localStorage.setItem("token", response.data.token);
-        originalRequest.headers.Authorization = `Bearer ${response.data.token}`;
+        const data = await getNewAccessToken();
+        localStorage.setItem("token", data.token);
+        originalRequest.headers.Authorization = `Bearer ${data.token}`;
         return api(originalRequest);
       } catch (refreshError) {
         localStorage.removeItem("token");

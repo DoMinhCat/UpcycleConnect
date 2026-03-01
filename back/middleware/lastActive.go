@@ -17,7 +17,7 @@ func UpdateLastActive(next http.Handler) http.Handler {
 		}
 		accountID := user.Id
 
-		_, err := utils.Conn.Exec("UPDATE accounts SET last_active = $1 WHERE id = $2 AND (last_active < $1 - INTERVAL '2 minutes' OR last_active IS NULL)", time.Now(), accountID)
+		_, err := utils.Conn.Exec("UPDATE accounts SET last_active = $1 WHERE id = $2 AND (last_active < $3 OR last_active IS NULL)", time.Now(), accountID, time.Now().Add(-2*time.Minute))
 		if err != nil {
 			slog.Error("UpdateLastActive() failed", "account_id", accountID, "error", err)
 		}

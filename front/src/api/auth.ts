@@ -32,3 +32,10 @@ export const isTokenExpired = () => {
   const decoded = jwtDecode<DecodedToken>(token);
   return decoded.exp * 1000 < Date.now();
 };
+
+export const getNewAccessToken = async () => {
+  const response = await api.post(ENDPOINTS.AUTH.REFRESH, {
+    token: getToken(),
+  });
+  return response.data;
+};

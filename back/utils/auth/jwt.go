@@ -9,12 +9,27 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// short lived access token (1 hour)
 func GenerateJWT(email string, role string, id int) (string, error){
 	claims := jwt.MapClaims{
 	"id_account": id,
 	"email": email,
 	"role": role,
-	"exp": time.Now().Add(time.Hour).Unix(),
+	// testing
+	"exp": time.Now().Add(time.Second * 1).Unix(),
+	"iat": time.Now().Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(utils.GetJWTSecret())
+}
+
+// long lived refresh token (1 week) to create new access token
+func GenerateRefreshToken(email string, role string, id int) (string, error){
+	claims := jwt.MapClaims{
+	"id_account": id,
+	"email": email,
+	"role": role,
+	"exp": time.Now().Add(time.Hour * 24 * 7).Unix(),
 	"iat": time.Now().Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

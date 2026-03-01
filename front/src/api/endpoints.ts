@@ -1,14 +1,15 @@
 export const ENDPOINTS = {
-    // admin endpoints
-    ADMIN: {
-        USERS: "/accounts/",
-    },
+  // admin endpoints
+  ADMIN: {
+    USERS: "/accounts/",
+  },
 
-    AUTH: {
-        LOGIN: "/login/",
-    },
+  AUTH: {
+    LOGIN: "/login/",
+    REFRESH: "/refresh/",
+  },
 
-    ACCOUNT: {
-        REGISTER: "/register/",
-    }
+  ACCOUNT: {
+    REGISTER: "/register/",
+  },
 } as const;

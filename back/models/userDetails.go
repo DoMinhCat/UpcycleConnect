@@ -1,6 +1,8 @@
 package models
 
+import "github.com/guregu/null"
+
 type UserDetails struct {
-	Phone string `json:"phone"`
+	Phone null.String `json:"phone"`
 	Score int    `json:"score"`
 }

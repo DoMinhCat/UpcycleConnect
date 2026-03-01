@@ -1,6 +1,8 @@
 package models
 
+import "github.com/guregu/null"
+
 type ProDetails struct {
-	Phone     string `json:"phone"`
-	IsPremium bool   `json:"is_premium"`
+	Phone     null.String `json:"phone"`
+	IsPremium bool        `json:"is_premium"`
 }

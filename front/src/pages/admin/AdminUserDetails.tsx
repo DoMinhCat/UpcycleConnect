@@ -2,11 +2,10 @@ import {
   Avatar,
   Container,
   Flex,
+  Paper,
   Stack,
   Text,
   Title,
-  Center,
-  Loader,
 } from "@mantine/core";
 import { PATHS } from "../../routes/paths";
 import AdminBreadcrumbs from "../../components/admin/AdminBreadcrumbs";
@@ -17,6 +16,8 @@ import { Navigate, useParams } from "react-router-dom";
 import { showErrorNotification } from "../../components/NotificationToast";
 import { useQuery } from "@tanstack/react-query";
 import FullScreenLoader from "../../components/FullScreenLoader";
+import InfoField from "../../components/InfoField";
+import dayjs from "dayjs";
 
 export default function AdminUserDetails() {
   const params = useParams();
@@ -54,20 +55,107 @@ export default function AdminUserDetails() {
         ]}
       />
       <Container px="md" size="sm" mt="xl">
-        <Flex align="flex-start" justify="flex-end">
-          <ScoreRing score={69} size={90} />
-        </Flex>
+        {accountDetails?.role === "user" && (
+          <Flex align="flex-start" justify="flex-end">
+            <ScoreRing score={accountDetails.score} size={90} />
+          </Flex>
+        )}
+
         <Stack justify="center" align="center">
-          <Avatar src={null} name="User's name" color="initials" size="100" />
+          <Avatar
+            // avatar must be in /src/assets/avatars
+            src={accountDetails?.avatar}
+            name="User's name"
+            color="initials"
+            size="100"
+          />
           <Title order={3}>{accountDetails?.username}</Title>
         </Stack>
-        <Title order={3} ta="left" mt="lg">
-          {accountDetails?.username}
+        <Title order={3} ta="left" mt="xl">
+          General Information
         </Title>
 
-        <Text>Email</Text>
-        <Text>Role</Text>
-        <Text>Phone</Text>
+        <Paper variant="primary" px="lg" py="md" mt="sm">
+          <InfoField label="Username">
+            <Text ps="sm" mt="xs" mb="xl">
+              {accountDetails?.username}
+            </Text>
+          </InfoField>
+          <InfoField label="Registered on">
+            <Text ps="sm" mt="xs" mb="xl">
+              {dayjs(accountDetails?.created_at).format("DD/MM/YYYY - HH:mm")}
+            </Text>
+          </InfoField>
+          <InfoField label="Role">
+            {accountDetails?.role === "user" ? (
+              <Text ps="sm" mt="xs" mb="xl" c="blue">
+                User
+              </Text>
+            ) : accountDetails?.role === "pro" ? (
+              <Text ps="sm" mt="xs" mb="xl" c="yellow">
+                Pro
+              </Text>
+            ) : accountDetails?.role === "employee" ? (
+              <Text ps="sm" mt="xs" mb="xl" c="green">
+                Employee
+              </Text>
+            ) : (
+              <Text ps="sm" mt="xs" mb="xl" c="red">
+                Admin
+              </Text>
+            )}
+          </InfoField>
+          <InfoField label="Status">
+            {accountDetails?.is_banned ? (
+              <Text ps="sm" mt="xs" mb="xl" c="red">
+                Banned
+              </Text>
+            ) : (
+              <Text ps="sm" mt="xs" mb="xl" c="green">
+                Active
+              </Text>
+            )}
+          </InfoField>
+          {accountDetails?.is_premium ??
+            (accountDetails?.is_premium ? (
+              <InfoField label="Subscription">
+                <Text ps="sm" mt="xs" mb="xl">
+                  Freemium
+                </Text>
+              </InfoField>
+            ) : (
+              <InfoField label="Subscription">
+                <Text
+                  ps="sm"
+                  mt="xs"
+                  mb="xl"
+                  gradient={{
+                    from: "rgba(199, 165, 70, 1)",
+                    to: "rgba(230, 225, 188, 1)",
+                    deg: 90,
+                  }}
+                >
+                  Premium
+                </Text>
+              </InfoField>
+            ))}
+        </Paper>
+
+        <Title order={3} ta="left" mt="xl">
+          Contact
+        </Title>
+        <Paper variant="primary" px="lg" py="md" mt="sm">
+          <InfoField label="Email">
+            <Text ps="sm" mt="xs" mb="xl">
+              {accountDetails?.email}
+            </Text>
+          </InfoField>
+          <InfoField label="Phone number">
+            <Text ps="sm" mt="xs" mb="xl">
+              {accountDetails?.phone ? accountDetails?.phone : "N/A"}
+            </Text>
+          </InfoField>
+        </Paper>
       </Container>
     </Container>
   );

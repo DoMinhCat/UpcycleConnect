@@ -233,7 +233,6 @@ export default function AdminUsersModule() {
         account.is_banned === (filters.statusValue === "banned");
       return matchesSearch && matchesRole && matchesStatus;
     });
-    // TODO
     return [...result].sort((a, b) => {
       if (filters.sortValue === "most_recent_registration") {
         return dayjs(b.created_at).diff(dayjs(a.created_at));

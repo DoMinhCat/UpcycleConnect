@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/guregu/null"
+)
 
 type CreateAccountRequest struct {
 	Email    string `json:"email"`
@@ -26,8 +30,9 @@ type AccountDetails struct {
 	Role      string    `json:"role"`
 	IsBanned  bool      `json:"is_banned"`
 	CreatedAt time.Time `json:"created_at"`
-	Phone     string    `json:"phone"`
+	Phone     null.String    `json:"phone"`
 	Score     int       `json:"score"`
 	IsPremium bool    `json:"is_premium"`
+	Avatar null.String `json:"avatar"`
 }
 

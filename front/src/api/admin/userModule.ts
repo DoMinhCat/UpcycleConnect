@@ -12,6 +12,7 @@ export interface Account {
   phone?: string;
   score?: number;
   is_premium?: boolean;
+  avatar?: string;
 }
 
 export async function getAllAccounts() {

@@ -1,7 +1,7 @@
 import { RingProgress, Text, Center, Stack } from "@mantine/core";
 import { IconLeaf } from "@tabler/icons-react";
 
-export function ScoreRing({ score, size }: { score: number; size: number }) {
+export function ScoreRing({ score, size }: { score?: number; size: number }) {
   return (
     <RingProgress
       size={size}
@@ -23,7 +23,7 @@ export function ScoreRing({ score, size }: { score: number; size: number }) {
               c="green"
               style={{ lineHeight: 1 }}
             >
-              {score}
+              {score ?? 0}
             </Text>
           </Stack>
         </Center>

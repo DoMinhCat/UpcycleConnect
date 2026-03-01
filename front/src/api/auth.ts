@@ -34,8 +34,6 @@ export const isTokenExpired = () => {
 };
 
 export const getNewAccessToken = async () => {
-  const response = await api.post(ENDPOINTS.AUTH.REFRESH, {
-    token: getToken(),
-  });
+  const response = await api.post(ENDPOINTS.AUTH.REFRESH);
   return response.data;
 };

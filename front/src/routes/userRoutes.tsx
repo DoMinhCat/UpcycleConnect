@@ -1,15 +1,12 @@
 import { Navigate, type RouteObject } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { isTokenExpired } from "../api/auth";
 import { PATHS } from "./paths";
 
 const UserGuard = ({ children }: { children: React.ReactNode }) => {
-  const { user, logout } = useAuth();
-  const unauthorized = !user || user.role !== "admin" || isTokenExpired();
+  const { user } = useAuth();
+  const unauthorized = !user || user.role !== "admin";
 
   if (unauthorized) {
-    if (user && isTokenExpired()) logout();
-
     return <Navigate to={PATHS.GUEST.LOGIN} replace />;
   }
 

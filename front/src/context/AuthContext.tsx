@@ -47,6 +47,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     setIsInitializing(false);
+
+    const handleAuthLogout = () => {
+      logout();
+    };
+    window.addEventListener("auth:logout", handleAuthLogout);
+    return () => window.removeEventListener("auth:logout", handleAuthLogout);
   }, []);
 
   const login = (token: string) => {

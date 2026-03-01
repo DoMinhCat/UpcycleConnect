@@ -3,7 +3,6 @@ import AdminLayout from "../layouts/AdminLayout.tsx";
 import AdminHome from "../pages/admin/AdminHome.tsx";
 import { PATHS } from "./paths.ts";
 import { useAuth } from "../context/AuthContext.tsx";
-import { isTokenExpired } from "../api/auth.ts";
 import AdminUsersModule from "../pages/admin/AdminUsersModule.tsx";
 import { Center, Loader } from "@mantine/core";
 import AdminUserDetails from "../pages/admin/AdminUserDetails.tsx";
@@ -13,8 +12,14 @@ import { useNavigate } from "react-router-dom";
 // implement the same Guard component for user and pro
 const AdminGuard = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
-  const { user, logout, isInitializing } = useAuth();
-  const unauthorized = !user || user.role !== "admin" || isTokenExpired();
+  const { user, isInitializing } = useAuth();
+  const unauthorized = !user || user.role !== "admin";
+
+  useEffect(() => {
+    if (unauthorized) {
+      navigate(PATHS.GUEST.LOGIN, { replace: true });
+    }
+  }, [unauthorized]);
 
   if (isInitializing) {
     return (
@@ -23,14 +28,6 @@ const AdminGuard = ({ children }: { children: React.ReactNode }) => {
       </Center>
     );
   }
-
-  useEffect(() => {
-    if (unauthorized) {
-      if (user && isTokenExpired()) logout();
-
-      navigate(PATHS.GUEST.LOGIN, { replace: true });
-    }
-  }, [unauthorized]);
 
   return <>{children}</>;
 };

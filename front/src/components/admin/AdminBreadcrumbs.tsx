@@ -17,6 +17,7 @@ export default function AdminBreadcrumbs({
   const breadcrumbsItems = breadcrumbs.map((breadcrumb) => {
     return (
       <Title
+        key={breadcrumb.href}
         order={2}
         onClick={() => {
           navigate(breadcrumb.href);

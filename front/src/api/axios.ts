@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getNewAccessToken } from "./auth";
+import { ENDPOINTS } from "./endpoints";
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -18,14 +19,21 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response.status === 401 && !originalRequest._retry) {
+    if (
+      error.response.status === 401 &&
+      !originalRequest._retry &&
+      originalRequest.url !== ENDPOINTS.AUTH.REFRESH
+    ) {
       originalRequest._retry = true;
-      const refreshToken = localStorage.getItem("refreshToken");
-      if (refreshToken) {
+      try {
         const response = await getNewAccessToken();
         localStorage.setItem("token", response.data.token);
         originalRequest.headers.Authorization = `Bearer ${response.data.token}`;
         return api(originalRequest);
+      } catch (refreshError) {
+        localStorage.removeItem("token");
+        window.dispatchEvent(new Event("auth:logout"));
+        return Promise.reject(refreshError);
       }
     }
     return Promise.reject(error);

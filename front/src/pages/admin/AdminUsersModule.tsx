@@ -220,6 +220,7 @@ export default function AdminUsersModule() {
     useQuery<Account[]>({
       queryKey: ["accounts"],
       queryFn: getAllAccounts,
+      staleTime: 1000 * 60 * 2, // refresh data every 2m
     });
   const filteredAccounts = useMemo(() => {
     const result = accounts.filter((account) => {

@@ -157,6 +157,8 @@ export default function AdminUserDetails() {
             "Password changed successfully.",
           );
           closeChangePassword();
+          setPassword("");
+          setConfirmPassword("");
         }
       },
       onError: (error: any) => {
@@ -409,6 +411,7 @@ export default function AdminUserDetails() {
                   variant="body-color"
                   w="50%"
                   mt="xs"
+                  value={confirmPassword}
                   placeholder="Confirm new password"
                   onChange={(event) => {
                     const value = event.currentTarget.value;

@@ -10,7 +10,7 @@ var once sync.Once
 
 // sets up the global slog instance
 func InitLogger() {
-    // avoid accidentally re-init the logger
+	// avoid accidentally re-init the logger
 	once.Do(func() {
 		opts := &slog.HandlerOptions{
 			Level: slog.LevelDebug,

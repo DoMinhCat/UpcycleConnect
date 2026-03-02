@@ -15,26 +15,29 @@ type CreateAccountRequest struct {
 }
 
 type Account struct {
-	Id        int       `json:"id"`
-	Email     string    `json:"email"`
-	Username  string    `json:"username"`
-	Role       string      `json:"role"`
-	IsBanned   bool        `json:"is_banned"`
-	CreatedAt  time.Time   `json:"created_at"`
+	Id         int       `json:"id"`
+	Email      string    `json:"email"`
+	Username   string    `json:"username"`
+	Role       string    `json:"role"`
+	IsBanned   bool      `json:"is_banned"`
+	CreatedAt  time.Time `json:"created_at"`
 	LastActive null.Time `json:"last_active"`
 }
 
 type AccountDetails struct {
-	Id        int       `json:"id"`
-	Email     string    `json:"email"`
-	Username  string    `json:"username"`
-	Role      string    `json:"role"`
-	IsBanned  bool      `json:"is_banned"`
-	CreatedAt time.Time `json:"created_at"`
-	LastActive null.Time `json:"last_active"`
-	Phone     null.String    `json:"phone"`
-	Score     int       `json:"score"`
-	IsPremium bool    `json:"is_premium"`
-	Avatar null.String `json:"avatar"`
+	Id         int         `json:"id"`
+	Email      string      `json:"email"`
+	Username   string      `json:"username"`
+	Role       string      `json:"role"`
+	IsBanned   bool        `json:"is_banned"`
+	CreatedAt  time.Time   `json:"created_at"`
+	LastActive null.Time   `json:"last_active"`
+	Phone      null.String `json:"phone"`
+	Score      int         `json:"score"`
+	IsPremium  bool        `json:"is_premium"`
+	Avatar     null.String `json:"avatar"`
 }
 
+type UpdatePasswordRequest struct{
+	Password string `json:"password"`
+}

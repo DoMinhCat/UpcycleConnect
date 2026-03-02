@@ -24,11 +24,11 @@ func CreateUser(newAccount models.CreateAccountRequest, accountID int) error {
 	return nil
 }
 
-func GetUserDetailsById(id_account int) (models.UserDetails, error){
+func GetUserDetailsById(id_account int) (models.UserDetails, error) {
 	var userDetails models.UserDetails
 	err := utils.Conn.QueryRow("SELECT phone, up_score FROM users WHERE id_account=$1", id_account).Scan(&userDetails.Phone, &userDetails.Score)
-	if err!=nil{
-		if err == sql.ErrNoRows{
+	if err != nil {
+		if err == sql.ErrNoRows {
 			return models.UserDetails{}, nil
 		}
 		return models.UserDetails{}, fmt.Errorf("GetUserDetailsById() failed: %v", err.Error())

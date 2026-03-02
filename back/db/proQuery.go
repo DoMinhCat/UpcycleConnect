@@ -24,11 +24,11 @@ func CreatePro(newAccount models.CreateAccountRequest, insertedId int) error {
 	return nil
 }
 
-func GetProDetailsById(id_account int) (models.ProDetails, error){
+func GetProDetailsById(id_account int) (models.ProDetails, error) {
 	var proDetails models.ProDetails
 	err := utils.Conn.QueryRow("SELECT phone, is_premium FROM pros WHERE id_account=$1", id_account).Scan(&proDetails.Phone, &proDetails.IsPremium)
-	if err!=nil{
-		if err == sql.ErrNoRows{
+	if err != nil {
+		if err == sql.ErrNoRows {
 			return models.ProDetails{}, nil
 		}
 		return models.ProDetails{}, fmt.Errorf("GetProDetailsById() failed: %v", err.Error())

@@ -12,7 +12,7 @@ func HealthCheck(w http.ResponseWriter, r *http.Request) {
 	err := utils.Conn.Ping()
 	if err != nil {
 		fmt.Fprintf(w, "Error connecting to database: %v", err)
-	} else{
+	} else {
 		var result = "Database connected successfully"
 		fmt.Fprintf(w, "%s", result)
 	}

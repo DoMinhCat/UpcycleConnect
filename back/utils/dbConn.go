@@ -11,7 +11,7 @@ import (
 var Conn *sql.DB
 var ErrDb error
 
-func GetDb() (*sql.DB, error){
+func GetDb() (*sql.DB, error) {
 	connString := GetDbUrl()
 	driver := GetDbDriver()
 	conn, err := sql.Open(driver, connString)

@@ -11,7 +11,7 @@ import (
 // basic validations for creating an account
 func ValidateAccountCreation(newAccount models.CreateAccountRequest) models.ValidationResponse {
 	var response models.ValidationResponse
-	
+
 	if len(newAccount.Username) < 4 || len(newAccount.Username) > 20 {
 		response = models.ValidationResponse{
 			Success: false,

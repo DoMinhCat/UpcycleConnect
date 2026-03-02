@@ -4,5 +4,5 @@ import "github.com/guregu/null"
 
 type UserDetails struct {
 	Phone null.String `json:"phone"`
-	Score int    `json:"score"`
+	Score int         `json:"score"`
 }

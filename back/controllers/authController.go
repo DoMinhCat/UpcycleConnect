@@ -11,35 +11,35 @@ import (
 	"time"
 )
 
-func Login(w http.ResponseWriter, r *http.Request) { 
-	var creds models.LoginRequest 
-	err := json.NewDecoder(r.Body).Decode(&creds) 
+func Login(w http.ResponseWriter, r *http.Request) {
+	var creds models.LoginRequest
+	err := json.NewDecoder(r.Body).Decode(&creds)
 
-	if err != nil { 
+	if err != nil {
 		response.RespondWithError(w, http.StatusBadRequest, "An error occurred.")
 		slog.Error("invalid JSON request body", "controller", "Login", "error", err)
-		return 
-	} 
-
-	existing, err := db.GetAccountCredsByEmail(creds.Email) 
-	if err != nil { 
-		response.RespondWithError(w, http.StatusInternalServerError, "An error occurred.")
-		slog.Error("GetAccountCredsByEmail() failed", "controller", "Login", "error", err)
-		return 
+		return
 	}
 
-	if existing == nil || creds.Email != existing.Email || !utils.IsPasswordCorrect(existing.Password, creds.Password){ 
+	existing, err := db.GetAccountCredsByEmail(creds.Email)
+	if err != nil {
+		response.RespondWithError(w, http.StatusInternalServerError, "An error occurred.")
+		slog.Error("GetAccountCredsByEmail() failed", "controller", "Login", "error", err)
+		return
+	}
+
+	if existing == nil || creds.Email != existing.Email || !utils.IsPasswordCorrect(existing.Password, creds.Password) {
 		response.RespondWithError(w, http.StatusUnauthorized, "Oops, incorrect email or password.")
-		return 
+		return
 	}
 
 	// check if is admin
-	if existing.Role=="employee"{
+	if existing.Role == "employee" {
 		isAdmin, err := db.GetEmployeeRoleById(existing.Id)
-		if err != nil { 
-    		response.RespondWithError(w, http.StatusInternalServerError, "An error occurred.")
+		if err != nil {
+			response.RespondWithError(w, http.StatusInternalServerError, "An error occurred.")
 			slog.Error("GetEmployeeRoleById() failed", "controller", "Login", "error", err)
-		return 
+			return
 		}
 		if isAdmin {
 			existing.Role = "admin"
@@ -49,23 +49,23 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token, err := utils.GenerateJWT(creds.Email, existing.Role, existing.Id)
-	if err != nil { 
+	if err != nil {
 		response.RespondWithError(w, http.StatusInternalServerError, "An error occurred.")
-		return 
+		return
 	}
 	refreshToken, err := utils.GenerateRefreshToken(creds.Email, existing.Role, existing.Id)
-	if err != nil { 
+	if err != nil {
 		response.RespondWithError(w, http.StatusInternalServerError, "An error occurred.")
-		return 
+		return
 	}
 
 	cookie := http.Cookie{
-		Name: "refreshToken",
-		Value: refreshToken,
-		Expires: time.Now().Add(time.Hour * 24 * 7),
-		Path: "/",
+		Name:     "refreshToken",
+		Value:    refreshToken,
+		Expires:  time.Now().Add(time.Hour * 24 * 7),
+		Path:     "/",
 		HttpOnly: true,
-		Secure: true,
+		Secure:   true,
 		SameSite: http.SameSiteStrictMode,
 	}
 	http.SetCookie(w, &cookie)

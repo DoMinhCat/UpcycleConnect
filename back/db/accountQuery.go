@@ -133,7 +133,7 @@ func GetAccountDetailsById(id_account int) (models.AccountDetails, error) {
 	row := utils.Conn.QueryRow("SELECT id, email, username, role, is_banned, created_at, avatar, last_active FROM accounts WHERE id=$1 AND deleted_at IS NULL", id_account)
 	err := row.Scan(&account.Id, &account.Email, &account.Username, &account.Role, &account.IsBanned, &account.CreatedAt, &account.Avatar, &account.LastActive)
 	if err != nil {
-		if err == sql.ErrNoRows{
+		if err == sql.ErrNoRows {
 			return models.AccountDetails{}, nil
 		}
 		return models.AccountDetails{}, fmt.Errorf("GetAccountById() failed: %v", err.Error())
@@ -147,7 +147,7 @@ func GetAccountDetailsById(id_account int) (models.AccountDetails, error) {
 			account.Role = "admin"
 		}
 	}
-	if account.Role == "pro"{
+	if account.Role == "pro" {
 		proDetails, err := GetProDetailsById(id_account)
 		if err != nil {
 			return models.AccountDetails{}, fmt.Errorf("GetAccountById() failed: %v", err.Error())
@@ -156,7 +156,7 @@ func GetAccountDetailsById(id_account int) (models.AccountDetails, error) {
 		account.IsPremium = proDetails.IsPremium
 	}
 
-	if account.Role == "user"{
+	if account.Role == "user" {
 		userDetail, err := GetUserDetailsById(id_account)
 		if err != nil {
 			return models.AccountDetails{}, fmt.Errorf("GetAccountById() failed: %v", err.Error())
@@ -180,4 +180,23 @@ func SoftDeleteAccount(id_account int) error {
 		return fmt.Errorf("SoftDeleteAccount() failed: %v", err.Error())
 	}
 	return nil
+}
+
+func UpdatePassword(id_account int, newPassword string) error {
+	hashedPassword := authUtils.HashPassword(newPassword)
+	_, err := utils.Conn.Exec("UPDATE accounts SET password=$1 WHERE id=$2 AND deleted_at IS NULL", hashedPassword, id_account)
+	if err != nil {
+		return fmt.Errorf("UpdatePassword() failed: %v", err.Error())
+	}
+	return nil
+}
+
+func GetRoleById(id_account int) (string, error){
+	var role string
+	row := utils.Conn.QueryRow("SELECT role FROM accounts WHERE id=$1 AND deleted_at IS NULL", id_account)
+	err := row.Scan(&role)
+	if err != nil {
+		return "", fmt.Errorf("GetRoleById() failed: %v", err.Error())
+	}
+	return role, nil
 }

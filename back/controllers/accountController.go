@@ -6,6 +6,7 @@ import (
 	"backend/utils"
 	validations "backend/utils/validations"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -73,7 +74,7 @@ func SoftDeleteAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	role := claims.Role
 	userID := claims.Id
-	
+
 	id_input := r.PathValue("id_account")
 	id_account, err := strconv.Atoi(id_input)
 	if err != nil {
@@ -153,4 +154,65 @@ func GetAccountDetails(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.RespondWithJSON(w, http.StatusOK, account)
+}
+
+func UpdatePassword(w http.ResponseWriter, r *http.Request) {
+	claims, ok := r.Context().Value("user").(models.AuthClaims)
+	if !ok {
+		utils.RespondWithError(w, http.StatusUnauthorized, "You are not authorized to get account details.")
+		return
+	}
+	role := claims.Role
+	userID := claims.Id
+	var newPassword models.UpdatePasswordRequest
+
+	id_input := r.PathValue("id_account")
+	id_account, err := strconv.Atoi(id_input)
+	if err != nil {
+		utils.RespondWithError(w, http.StatusBadRequest, "An error occurred while updating password.")
+		slog.Error("Atoi() failed", "controller", "UpdatePassword", "error", err)
+		return
+	}
+	if role != "admin" && id_account != userID {
+		utils.RespondWithError(w, http.StatusForbidden, "You can only update your own account's password.")
+		return
+	}
+
+	deleteRole, err := db.GetRoleById(id_account)
+	if err != nil {
+		utils.RespondWithError(w, http.StatusBadRequest, "An error occurred while updating password.")
+		slog.Error("GetRoleById() failed", "controller", "UpdatePassword", "error", err)
+		return
+	}
+	if deleteRole == "admin" && id_account != userID {
+		utils.RespondWithError(w, http.StatusForbidden, "Only the admin himself/herself can update his/her account's password.")
+		return
+	}
+
+	err = json.NewDecoder(r.Body).Decode(&newPassword)
+	if err != nil {
+		utils.RespondWithError(w, http.StatusBadRequest, "An error occurred while updating account's password.")
+		slog.Error("invalid JSON request body", "error", err)
+		return
+	}
+
+	exist, err := db.CheckAccountExistsById(id_account)
+	if err != nil {
+		utils.RespondWithError(w, http.StatusBadRequest, "An error occurred while updating account's password.")
+		slog.Error("CheckAccountExistsById() failed", "controller", "UpdatePassword", "error", err)
+		return
+	}
+	if !exist {
+		utils.RespondWithError(w, http.StatusNotFound, fmt.Sprintf("Account with ID '%v' not found.", id_account))
+		return
+	}
+
+	err = db.UpdatePassword(id_account, newPassword.Password)
+	if err != nil {
+		utils.RespondWithError(w, http.StatusBadRequest, "An error occurred while updating account's password.")
+		slog.Error("UpdatePassword() failed", "controller", "UpdatePassword", "error", err)
+		return
+	}
+
+	utils.RespondWithJSON(w, http.StatusNoContent,nil)
 }

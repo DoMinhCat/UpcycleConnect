@@ -23,6 +23,7 @@ import {
 } from "../NotificationToast";
 import { Link } from "react-router-dom";
 import PasswordStrengthInput, { requirements } from "../PasswordStrengthInput";
+import { useMutation } from "@tanstack/react-query";
 
 export default function RegisterForm() {
   const navigate = useNavigate();
@@ -72,7 +73,35 @@ export default function RegisterForm() {
   // email
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const registerMutation = useMutation({
+    mutationFn: () =>
+      RegisterRequest({
+        email,
+        password,
+        username: Username,
+        phone,
+        role: "user",
+      }),
+    onSuccess: (response) => {
+      if (response?.status === 201) {
+        navigate(PATHS.GUEST.LOGIN);
+        showSuccessNotification(
+          "Registration Success",
+          "You have been registered successfully, log in to continue.",
+        );
+      }
+    },
+    onError: (error: any) => {
+      const errMessage =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        error.message ||
+        "An unexpected error occurred";
+      showErrorNotification("Registration failed", errMessage);
+    },
+  });
+
   const validateEmail = (val: string) => {
     const regex = /^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$/;
     if (!val) {
@@ -130,7 +159,7 @@ export default function RegisterForm() {
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault(); // Prevents page reload
 
     if (
@@ -141,35 +170,8 @@ export default function RegisterForm() {
       !validatePhone(phone)
     )
       return;
-    setIsLoading(true);
-    try {
-      // Call axios
-      const role = "user";
-      const response = await RegisterRequest({
-        email,
-        password,
-        username: Username,
-        phone,
-        role,
-      });
-      if (response?.status === 201) {
-        // redirect
-        navigate(PATHS.GUEST.LOGIN);
-        showSuccessNotification(
-          "Registration Success",
-          "You have been registered successfully, log in to continue.",
-        );
-      } else {
-        showErrorNotification(
-          "Registration Failed",
-          response?.data?.error || "Unknown error",
-        );
-      }
-    } catch (error: any) {
-      showErrorNotification("Registration Failed", error);
-    } finally {
-      setIsLoading(false);
-    }
+
+    registerMutation.mutate();
   };
 
   return (
@@ -204,7 +206,7 @@ export default function RegisterForm() {
                 setEmail(value);
                 validateEmail(value);
               }}
-              disabled={isLoading}
+              disabled={registerMutation.isPending}
               required
             />
 
@@ -214,7 +216,7 @@ export default function RegisterForm() {
               label="Password"
               placeholder="Your super secret"
               value={password}
-              disabled={isLoading}
+              disabled={registerMutation.isPending}
               leftSection={<IconLock size={14} />}
               onChange={(event) => {
                 const value = event.currentTarget.value;
@@ -237,7 +239,7 @@ export default function RegisterForm() {
                 setConfirmPassword(value);
                 validateConfirmPassword(value);
               }}
-              disabled={isLoading}
+              disabled={registerMutation.isPending}
               error={ConfirmPasswordError}
               required
             />
@@ -258,7 +260,7 @@ export default function RegisterForm() {
                 setUsername(value);
                 validateUsername(value);
               }}
-              disabled={isLoading}
+              disabled={registerMutation.isPending}
               required
             />
             <TextInput
@@ -274,7 +276,7 @@ export default function RegisterForm() {
                 setPhone(value);
                 validatePhone(value);
               }}
-              disabled={isLoading}
+              disabled={registerMutation.isPending}
             />
           </Fieldset>
           <Checkbox
@@ -289,8 +291,8 @@ export default function RegisterForm() {
             mt="xl"
             variant="primary"
             type="submit"
-            disabled={isLoading}
-            loading={isLoading}
+            disabled={registerMutation.isPending}
+            loading={registerMutation.isPending}
           >
             Register
           </Button>

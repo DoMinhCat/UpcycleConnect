@@ -15,6 +15,7 @@ import { LoginRequest } from "../../api/auth";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { showErrorNotification } from "../NotificationToast";
+import { useMutation } from "@tanstack/react-query";
 
 export function LoginForm() {
   const navigate = useNavigate();
@@ -23,7 +24,29 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const loginMutation = useMutation({
+    mutationFn: () => LoginRequest({ email, password }),
+    onSuccess: (data) => {
+      const user = login(data.token);
+
+      // redirect
+      if (user.role === "admin") {
+        navigate(PATHS.ADMIN.HOME);
+      } else {
+        navigate(PATHS.HOME);
+      }
+    },
+    onError: (error: any) => {
+      const errMessage =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        error.message ||
+        "An unexpected error occurred";
+      showErrorNotification("Login failed", errMessage);
+    },
+  });
+
   const validateEmail = (val: string) => {
     const regex = /^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$/;
     if (!val) {
@@ -45,27 +68,12 @@ export function LoginForm() {
     setPasswordError(null);
     return true;
   };
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault(); // Prevents page reload
 
     if (!validateEmail(email)) return;
-    setIsLoading(true);
-    try {
-      // Call axios
-      const data = await LoginRequest({ email, password });
-      const user = login(data.token);
 
-      // redirect
-      if (user.role === "admin") {
-        navigate(PATHS.ADMIN.HOME);
-      } else {
-        navigate(PATHS.HOME);
-      }
-    } catch (error: any) {
-      showErrorNotification("Login Failed", error);
-    } finally {
-      setIsLoading(false);
-    }
+    loginMutation.mutate();
   };
 
   return (
@@ -99,7 +107,7 @@ export function LoginForm() {
               validateEmail(email);
             }}
             onBlur={() => validateEmail(email)}
-            disabled={isLoading}
+            disabled={loginMutation.isPending}
             required
           />
           <PasswordInput
@@ -112,7 +120,7 @@ export function LoginForm() {
               validatePassword(password);
             }}
             onBlur={() => validatePassword(password)}
-            disabled={isLoading}
+            disabled={loginMutation.isPending}
             error={passwordError}
             required
           />
@@ -127,8 +135,8 @@ export function LoginForm() {
             fullWidth
             mt="xl"
             type="submit"
-            disabled={isLoading}
-            loading={isLoading}
+            disabled={loginMutation.isPending}
+            loading={loginMutation.isPending}
           >
             Sign in
           </Button>

@@ -38,12 +38,7 @@ export function LoginForm() {
       }
     },
     onError: (error: any) => {
-      const errMessage =
-        error.response?.data?.error ||
-        error.response?.data?.message ||
-        error.message ||
-        "An unexpected error occurred";
-      showErrorNotification("Login failed", errMessage);
+      showErrorNotification("Login failed", error);
     },
   });
 

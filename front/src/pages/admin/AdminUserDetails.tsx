@@ -37,8 +37,10 @@ import PasswordStrengthInput, {
 } from "../../components/PasswordStrengthInput";
 import { IconLock } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
+import { useAuth } from "../../context/AuthContext";
 
 export default function AdminUserDetails() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   // modal control
   const [openedEdit, { open: openEdit, close: closeEdit }] =
@@ -128,16 +130,10 @@ export default function AdminUserDetails() {
         );
         closeDelete();
         navigate(PATHS.ADMIN.USERS);
-      } else {
-        showErrorNotification("Account deletion failed", response?.data.error);
       }
     },
     onError: (error: any) => {
-      const errMessage =
-        error.response?.data?.mesage ||
-        error.message ||
-        "An unexpected error occurred";
-      showErrorNotification("Account deletion failed", errMessage);
+      showErrorNotification("Account deletion failed", error);
     },
   });
   const handleDeleteAccount = async () => {
@@ -162,11 +158,7 @@ export default function AdminUserDetails() {
         }
       },
       onError: (error: any) => {
-        const errMessage =
-          error.response?.data?.mesage ||
-          error.message ||
-          "An unexpected error occurred";
-        showErrorNotification("Password update failed", errMessage);
+        showErrorNotification("Password update failed", error);
       },
     });
 
@@ -188,7 +180,8 @@ export default function AdminUserDetails() {
     return <Navigate to={PATHS.ADMIN.USERS} replace />;
   }
   const role = accountDetails?.role;
-
+  console.log(role === "admin" && accountId != user?.id);
+  console.log(accountId.toString(), user?.id);
   return (
     <Container px="md" size="xl">
       <AdminBreadcrumbs
@@ -305,13 +298,13 @@ export default function AdminUserDetails() {
         </Title>
         <Paper variant="primary" px="lg" py="md" mt="sm">
           <InfoField label="Last active on">
-            <Text ps="sm" mt="xs" mb="xl">
+            <Text ps="sm" mt="xs">
               {dayjs(accountDetails?.last_active).format("DD/MM/YYYY - HH:mm")}
             </Text>
           </InfoField>
           {role == "user" && (
             <>
-              <InfoField label="Total container deposits">
+              <InfoField label="Total container deposits" mt="xl">
                 <Text ps="sm" mt="xs" mb="xl">
                   TODO: total container deposits of user
                 </Text>
@@ -331,7 +324,7 @@ export default function AdminUserDetails() {
 
           {role == "employee" && (
             <>
-              <InfoField label="Total events/workshops assigned">
+              <InfoField label="Total events/workshops assigned" mt="xl">
                 <Text ps="sm" mt="xs" mb="xl">
                   TODO: total events linked to employee
                 </Text>
@@ -345,7 +338,7 @@ export default function AdminUserDetails() {
           )}
           {role == "pro" && (
             <>
-              <InfoField label="Total listings acquired">
+              <InfoField label="Total listings acquired" mt="xl">
                 <Text ps="sm" mt="xs" mb="xl">
                   TODO: total listings reserved/purchased
                 </Text>
@@ -379,7 +372,12 @@ export default function AdminUserDetails() {
               <Text c="dimmed" mt="xs">
                 Modify account's username, contact information, etc.
               </Text>
-              <Button mt="xs" variant="edit" onClick={openEdit}>
+              <Button
+                mt="xs"
+                variant="edit"
+                onClick={openEdit}
+                disabled={role === "admin" && accountId != user?.id}
+              >
                 Edit account
               </Button>
             </Box>
@@ -396,7 +394,10 @@ export default function AdminUserDetails() {
                   variant="body-color"
                   placeholder="New password"
                   value={password}
-                  disabled={isLoadingPasswordForm}
+                  disabled={
+                    isLoadingPasswordForm ||
+                    (role === "admin" && accountId != user?.id)
+                  }
                   leftSection={<IconLock size={14} />}
                   onChange={(event) => {
                     const value = event.currentTarget.value;
@@ -418,7 +419,10 @@ export default function AdminUserDetails() {
                     setConfirmPassword(value);
                     validateConfirmPassword(value);
                   }}
-                  disabled={isLoadingPasswordForm}
+                  disabled={
+                    isLoadingPasswordForm ||
+                    (role === "admin" && accountId != user?.id)
+                  }
                   error={confirmPasswordError}
                   required
                 />
@@ -434,7 +438,10 @@ export default function AdminUserDetails() {
                     openChangePassword();
                   }}
                   loading={isPendingPasswordUpdate}
-                  disabled={isPendingPasswordUpdate}
+                  disabled={
+                    isPendingPasswordUpdate ||
+                    (role === "admin" && accountId != user?.id)
+                  }
                 >
                   Change password
                 </Button>
@@ -465,9 +472,15 @@ export default function AdminUserDetails() {
           <InfoField label="Ban account">
             <Box ps="sm" mb="xl">
               <Text c="dimmed" mt="xs">
-                This account will not be able to log in until an admin unban it
+                This account will not be able to access to UpAgain until an
+                admin unbans it
               </Text>
-              <Button mt="xs" variant="delete" onClick={openBan}>
+              <Button
+                mt="xs"
+                variant="delete"
+                onClick={openBan}
+                disabled={role === "admin" && accountId != user?.id}
+              >
                 Ban account
               </Button>
             </Box>
@@ -476,9 +489,14 @@ export default function AdminUserDetails() {
           <InfoField label="Delete account">
             <Box ps="sm" mb="xl">
               <Text c="dimmed" mt="xs">
-                This account be soft deleted
+                This account will be soft deleted
               </Text>
-              <Button mt="xs" variant="delete" onClick={openDelete}>
+              <Button
+                mt="xs"
+                variant="delete"
+                onClick={openDelete}
+                disabled={role === "admin" && accountId != user?.id}
+              >
                 Delete account
               </Button>
             </Box>

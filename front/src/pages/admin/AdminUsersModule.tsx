@@ -166,16 +166,10 @@ export default function AdminUsersModule() {
         );
         closeCreate();
         queryClient.invalidateQueries({ queryKey: ["accounts"] });
-      } else {
-        showErrorNotification("Account creation failed", response?.data.error);
       }
     },
     onError: (error: any) => {
-      const errMessage =
-        error.response?.data?.mesage ||
-        error.message ||
-        "An unexpected error occurred";
-      showErrorNotification("Account creation failed", errMessage);
+      showErrorNotification("Account creation failed", error);
     },
   });
 
@@ -343,16 +337,10 @@ export default function AdminUsersModule() {
         );
         closeDelete();
         queryClient.invalidateQueries({ queryKey: ["accounts"] });
-      } else {
-        showErrorNotification("Account deletion failed", response?.data.error);
       }
     },
     onError: (error: any) => {
-      const errMessage =
-        error.response?.data?.mesage ||
-        error.message ||
-        "An unexpected error occurred";
-      showErrorNotification("Account deletion failed", errMessage);
+      showErrorNotification("Account deletion failed", error);
     },
   });
 

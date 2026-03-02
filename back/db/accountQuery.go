@@ -198,5 +198,15 @@ func GetRoleById(id_account int) (string, error){
 	if err != nil {
 		return "", fmt.Errorf("GetRoleById() failed: %v", err.Error())
 	}
+
+	if role == "employee" {
+			isAdmin, err := CheckIsAdmin(id_account)
+			if err != nil {
+				return "", fmt.Errorf("GetRoleById() failed: CheckIsAdmin() failed: %v", err.Error())
+			}
+			if isAdmin {
+				role = "admin"
+			}
+		}
 	return role, nil
 }

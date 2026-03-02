@@ -10,7 +10,7 @@ import { showInfoNotification } from "../components/NotificationToast";
 
 interface User {
   token: string;
-  id: string;
+  id: number;
   role: string;
   email: string;
 }
@@ -33,11 +33,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     if (token) {
       try {
-        const decoded = jwtDecode<User>(token);
+        const decoded = jwtDecode<any>(token);
 
         setUser({
           token: token,
-          id: decoded.id,
+          id: decoded.id_account,
           role: decoded.role,
           email: decoded.email,
         });
@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const userData = {
       token,
-      id: decoded.id,
+      id: decoded.id_account,
       role: decoded.role,
       email: decoded.email,
     };

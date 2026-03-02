@@ -5,17 +5,21 @@ export const showErrorNotification = (title = "Error", error: any) => {
   // default title is "Error" if not provided any title
   let message = "An unexpected error occurred.";
 
-  if (error.response) {
+  if (typeof error === "string") {
+    message = error;
+  } else if (error?.response) {
     const data = error.response.data;
 
     if (typeof data === "string") {
       message = data;
     } else if (data && typeof data === "object" && data.message) {
       message = data.message;
+    } else if (data && typeof data === "object" && data.error) {
+      message = data.error;
     } else {
       message = JSON.stringify(data);
     }
-  } else {
+  } else if (error?.message) {
     message = error.message;
   }
 

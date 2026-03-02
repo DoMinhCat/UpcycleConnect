@@ -6,18 +6,29 @@ import {
   Paper,
   PasswordInput,
   Stack,
+  Group,
   Text,
   Title,
   Button,
+  Modal,
 } from "@mantine/core";
 import { PATHS } from "../../routes/paths";
 import AdminBreadcrumbs from "../../components/admin/AdminBreadcrumbs";
 import { ScoreRing } from "../../components/ScoreRing";
 import { useEffect, useState } from "react";
-import { getAccountDetails, type Account } from "../../api/admin/userModule";
-import { Navigate, useParams } from "react-router-dom";
-import { showErrorNotification } from "../../components/NotificationToast";
-import { useQuery } from "@tanstack/react-query";
+import {
+  deleteAccount,
+  getAccountDetails,
+  updatePassword,
+  type Account,
+  type updatePasswordPayload,
+} from "../../api/admin/userModule";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
+import {
+  showErrorNotification,
+  showSuccessNotification,
+} from "../../components/NotificationToast";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import FullScreenLoader from "../../components/FullScreenLoader";
 import InfoField from "../../components/InfoField";
 import dayjs from "dayjs";
@@ -25,8 +36,21 @@ import PasswordStrengthInput, {
   requirements,
 } from "../../components/PasswordStrengthInput";
 import { IconLock } from "@tabler/icons-react";
+import { useDisclosure } from "@mantine/hooks";
 
 export default function AdminUserDetails() {
+  const navigate = useNavigate();
+  // modal control
+  const [openedEdit, { open: openEdit, close: closeEdit }] =
+    useDisclosure(false);
+  const [openedDelete, { open: openDelete, close: closeDelete }] =
+    useDisclosure(false);
+  const [openedBan, { open: openBan, close: closeBan }] = useDisclosure(false);
+  const [
+    openedChangePassword,
+    { open: openChangePassword, close: closeChangePassword },
+  ] = useDisclosure(false);
+
   // states for password form
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
@@ -36,35 +60,6 @@ export default function AdminUserDetails() {
   const [confirmPasswordError, setConfirmPasswordError] = useState<
     string | null
   >(null);
-
-  const params = useParams();
-  const accountId: number = params.id ? parseInt(params.id) : 0;
-  const isValidId = !isNaN(accountId) && accountId > 0;
-  const {
-    data: accountDetails,
-    isLoading: isAccountDetailsLoading,
-    error,
-  } = useQuery<Account>({
-    queryKey: ["accountDetails", accountId],
-    queryFn: () => getAccountDetails(accountId),
-    enabled: isValidId, // only run query if isValidId
-  });
-
-  useEffect(() => {
-    if (error) {
-      showErrorNotification("Error", "Error while fetching account details");
-    }
-  }, [error]);
-
-  if (isAccountDetailsLoading) {
-    return <FullScreenLoader />;
-  }
-
-  if (error) {
-    return <Navigate to={PATHS.ADMIN.USERS} replace />;
-  }
-
-  const role = accountDetails?.role;
 
   //validations
   const validatePassword = (val: string) => {
@@ -101,6 +96,96 @@ export default function AdminUserDetails() {
     setConfirmPasswordError(null);
     return true;
   };
+
+  // Fetch account info to display
+  const params = useParams();
+  const accountId: number = params.id ? parseInt(params.id) : 0;
+  const isValidId = !isNaN(accountId) && accountId > 0;
+  const {
+    data: accountDetails,
+    isLoading: isAccountDetailsLoading,
+    error: errorAccountDetails,
+  } = useQuery<Account>({
+    queryKey: ["accountDetails", accountId],
+    queryFn: () => getAccountDetails(accountId),
+    enabled: isValidId, // only run query if isValidId
+  });
+
+  useEffect(() => {
+    if (errorAccountDetails) {
+      showErrorNotification("Error", "Error while fetching account details");
+    }
+  }, [errorAccountDetails]);
+
+  // delete hook
+  const deletionMutation = useMutation({
+    mutationFn: (accountId: number) => deleteAccount(accountId),
+    onSuccess: (response) => {
+      if (response.status === 204) {
+        showSuccessNotification(
+          "Account deleted",
+          "Account deleted successfully.",
+        );
+        closeDelete();
+        navigate(PATHS.ADMIN.USERS);
+      } else {
+        showErrorNotification("Account deletion failed", response?.data.error);
+      }
+    },
+    onError: (error: any) => {
+      const errMessage =
+        error.response?.data?.mesage ||
+        error.message ||
+        "An unexpected error occurred";
+      showErrorNotification("Account deletion failed", errMessage);
+    },
+  });
+  const handleDeleteAccount = async () => {
+    if (accountId) {
+      deletionMutation.mutate(accountId);
+    }
+  };
+
+  // change pass hook
+  const { mutate: mutatePasswordUpdate, isPending: isPendingPasswordUpdate } =
+    useMutation({
+      mutationFn: (payload: updatePasswordPayload) => updatePassword(payload),
+      onSuccess: (response) => {
+        if (response?.status === 204) {
+          showSuccessNotification(
+            "Password updated",
+            "Password changed successfully.",
+          );
+          closeChangePassword();
+        }
+      },
+      onError: (error: any) => {
+        const errMessage =
+          error.response?.data?.mesage ||
+          error.message ||
+          "An unexpected error occurred";
+        showErrorNotification("Password update failed", errMessage);
+      },
+    });
+
+  const handleChangePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (
+      !validatePassword(password) ||
+      !validateConfirmPassword(confirmPassword)
+    )
+      return;
+
+    mutatePasswordUpdate({ id: accountId, newPassword: password });
+  };
+
+  if (isAccountDetailsLoading) {
+    return <FullScreenLoader />;
+  }
+  if (errorAccountDetails) {
+    return <Navigate to={PATHS.ADMIN.USERS} replace />;
+  }
+  const role = accountDetails?.role;
 
   return (
     <Container px="md" size="xl">
@@ -287,44 +372,91 @@ export default function AdminUserDetails() {
           Danger zone
         </Title>
         <Paper variant="primary" px="lg" py="md" mt="sm">
+          <InfoField label="Edit account">
+            <Box ps="sm" mb="xl">
+              <Text c="dimmed" mt="xs">
+                Modify account's username, contact information, etc.
+              </Text>
+              <Button mt="xs" variant="edit" onClick={openEdit}>
+                Edit account
+              </Button>
+            </Box>
+          </InfoField>
+
           <InfoField label="Change password">
             <Box ps="sm" mb="xl">
               <Text mt="xs" mb="xs" c="dimmed">
                 Assign a new password for this account
               </Text>
-              <PasswordStrengthInput
-                w="50%"
-                variant="body-color"
-                placeholder="New password"
-                value={password}
-                disabled={isLoadingPasswordForm}
-                leftSection={<IconLock size={14} />}
-                onChange={(event) => {
-                  const value = event.currentTarget.value;
-                  setPassword(value);
-                  validatePassword(value);
-                }}
-                error={passwordError}
-                required
-              />
-              <PasswordInput
-                leftSection={<IconLock size={14} />}
-                variant="body-color"
-                w="50%"
-                mt="xs"
-                placeholder="Confirm new password"
-                onChange={(event) => {
-                  const value = event.currentTarget.value;
-                  setConfirmPassword(value);
-                  validateConfirmPassword(value);
-                }}
-                disabled={isLoadingPasswordForm}
-                error={confirmPasswordError}
-                required
-              />
-              <Button mt="md" variant="delete">
-                Change password
-              </Button>
+              <form onSubmit={handleChangePassword}>
+                <PasswordStrengthInput
+                  w="50%"
+                  variant="body-color"
+                  placeholder="New password"
+                  value={password}
+                  disabled={isLoadingPasswordForm}
+                  leftSection={<IconLock size={14} />}
+                  onChange={(event) => {
+                    const value = event.currentTarget.value;
+                    setPassword(value);
+                    validatePassword(value);
+                  }}
+                  error={passwordError}
+                  required
+                />
+                <PasswordInput
+                  leftSection={<IconLock size={14} />}
+                  variant="body-color"
+                  w="50%"
+                  mt="xs"
+                  placeholder="Confirm new password"
+                  onChange={(event) => {
+                    const value = event.currentTarget.value;
+                    setConfirmPassword(value);
+                    validateConfirmPassword(value);
+                  }}
+                  disabled={isLoadingPasswordForm}
+                  error={confirmPasswordError}
+                  required
+                />
+                <Button
+                  mt="md"
+                  variant="edit"
+                  onClick={() => {
+                    if (
+                      !validatePassword(password) ||
+                      !validateConfirmPassword(confirmPassword)
+                    )
+                      return;
+                    openChangePassword();
+                  }}
+                  loading={isPendingPasswordUpdate}
+                  disabled={isPendingPasswordUpdate}
+                >
+                  Change password
+                </Button>
+                {/* // modal change pass */}
+                <Modal
+                  opened={openedChangePassword}
+                  onClose={closeChangePassword}
+                  title="Change password"
+                >
+                  Are you sure you change password for this account? The old
+                  password will be replaced by the new one.
+                  <Group mt="lg" justify="flex-end">
+                    <Button onClick={closeChangePassword} variant="grey">
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleChangePassword}
+                      variant="edit"
+                      loading={isPendingPasswordUpdate}
+                    >
+                      Change password
+                    </Button>
+                  </Group>
+                </Modal>
+              </form>
             </Box>
           </InfoField>
           <InfoField label="Ban account">
@@ -332,7 +464,7 @@ export default function AdminUserDetails() {
               <Text c="dimmed" mt="xs">
                 This account will not be able to log in until an admin unban it
               </Text>
-              <Button mt="xs" variant="delete">
+              <Button mt="xs" variant="delete" onClick={openBan}>
                 Ban account
               </Button>
             </Box>
@@ -343,13 +475,69 @@ export default function AdminUserDetails() {
               <Text c="dimmed" mt="xs">
                 This account be soft deleted
               </Text>
-              <Button mt="xs" variant="delete">
+              <Button mt="xs" variant="delete" onClick={openDelete}>
                 Delete account
               </Button>
             </Box>
           </InfoField>
         </Paper>
       </Container>
+      {/* // modal delete */}
+      <Modal opened={openedDelete} onClose={closeDelete} title="Delete account">
+        Are you sure you want to delete this account?
+        <br />
+        This account will be soft deleted.
+        <Group mt="lg" justify="flex-end">
+          <Button onClick={closeDelete} variant="grey">
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              handleDeleteAccount();
+            }}
+            variant="delete"
+            loading={deletionMutation.isPending}
+          >
+            Delete
+          </Button>
+        </Group>
+      </Modal>
+      {/* // modal edit */}
+      <Modal opened={openedEdit} onClose={closeEdit} title="Edit account">
+        Edit
+        <Group mt="lg" justify="flex-end">
+          <Button onClick={closeEdit} variant="grey">
+            Cancel
+          </Button>
+          <Button
+            // onClick={() => {
+            //   handleDeleteAccount();
+            // }}
+            variant="primary"
+            // loading={deletionMutation.isPending}
+          >
+            Delete
+          </Button>
+        </Group>
+      </Modal>
+      {/* // modal ban */}
+      <Modal opened={openedBan} onClose={closeBan} title="Ban account">
+        Are you sure you want to ban this account? This account will be banned.
+        <Group mt="lg" justify="flex-end">
+          <Button onClick={closeBan} variant="grey">
+            Cancel
+          </Button>
+          <Button
+            // onClick={() => {
+            //   handleDeleteAccount();
+            // }}
+            variant="delete"
+            // loading={deletionMutation.isPending}
+          >
+            Ban account
+          </Button>
+        </Group>
+      </Modal>
     </Container>
   );
 }

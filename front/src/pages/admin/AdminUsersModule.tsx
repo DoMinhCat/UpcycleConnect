@@ -171,7 +171,11 @@ export default function AdminUsersModule() {
       }
     },
     onError: (error: any) => {
-      showErrorNotification("Account creation failed", error);
+      const errMessage =
+        error.response?.data?.mesage ||
+        error.message ||
+        "An unexpected error occurred";
+      showErrorNotification("Account creation failed", errMessage);
     },
   });
 
@@ -343,7 +347,11 @@ export default function AdminUsersModule() {
       }
     },
     onError: (error: any) => {
-      showErrorNotification("Account deletion failed", error);
+      const errMessage =
+        error.response?.data?.mesage ||
+        error.message ||
+        "An unexpected error occurred";
+      showErrorNotification("Account deletion failed", errMessage);
     },
   });
 

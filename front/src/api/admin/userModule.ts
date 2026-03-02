@@ -39,3 +39,13 @@ export const getAccountDetails = async (id_account: number) => {
   const response = await api.get(ENDPOINTS.ADMIN.USERS + id_account + "/");
   return response.data;
 };
+
+export interface updatePasswordPayload {
+  id: number;
+  newPassword: string;
+}
+export const updatePassword = async (payload: updatePasswordPayload) => {
+  return await api.put(ENDPOINTS.ADMIN.USERS + payload.id + "/password/", {
+    password: payload.newPassword,
+  });
+};
